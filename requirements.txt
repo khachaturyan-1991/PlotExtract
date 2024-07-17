@@ -1,0 +1,11 @@
+# upyther
+pip install ipython
+pip install ipykernel
+ipython kernel install --user --name=plotextract
+python -m ipykernel install --user --name=plotextract
+
+# mlflow
+pip install mlflow
+
+# pytorch
+pip install --pre torch torchvision torchaudio --extra-index-url https://download.pytorch.org/whl/nightly/cpu

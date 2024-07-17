@@ -1,11 +1,8 @@
 import numpy as np
 import matplotlib.pyplot as plt
-
 import torch
 from torch.utils.data import Dataset, DataLoader
 from torchvision import transforms
-
-from PIL import Image
 
 
 class PlotDataset(Dataset):
@@ -19,7 +16,7 @@ class PlotDataset(Dataset):
 
     def within_tolerance(self, img, color, tol):
         return np.all(np.abs(img - np.array(color) * 255) <= tol, axis=-1)
-        
+
     def __getitem__(self, idx):
 
         a1, a2 = np.random.uniform(-10, 10, 2)
@@ -43,7 +40,7 @@ class PlotDataset(Dataset):
         fig.canvas.draw()
         image = np.array(fig.canvas.renderer.buffer_rgba())
         plt.close(fig)
-        
+
         # take only RGB
         image = image[:, :, :3]
 
@@ -76,14 +73,14 @@ if __name__ == "__main__":
     axes = axes.ravel()
 
     for i in range(6):
-        axes[i].imshow(images[i].permute(1,2,0))
+        axes[i].imshow(images[i].permute(1, 2, 0))
         axes[i].axis("off")
         axes[i+6].imshow(masks[i])
         axes[i+6].axis("off")
         axes[i + 6].set_title(f"{np.unique(masks[i])}")
 
     for i in range(6):
-        axes[i + 12].imshow(images[i + 6].permute(1,2,0))
+        axes[i + 12].imshow(images[i + 6].permute(1, 2, 0))
         axes[i + 12].axis("off")
         axes[i + 18].imshow(masks[i + 6])
         axes[i + 18].axis("off")

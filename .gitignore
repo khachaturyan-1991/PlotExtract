@@ -1,0 +1,25 @@
+# ignore ALL .log files
+*.log
+
+# ignore ALL images
+*.png
+*.jpg
+*.jpeg
+
+# saved models
+*.h5
+*.keras
+*.pth
+
+# garbege
+*.pyc
+*.csv
+*.gz
+__pycache__/*.pyc
+./data/__pycache__/*.pyc
+./models_zoo/__pycache__/*.pyc
+
+# data
+.plotextract
+./data
+./mlruns

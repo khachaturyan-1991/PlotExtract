@@ -1,0 +1,15 @@
+artifact_uri: file:///Users/dr.rub/Desktop/PlotExtract/mlruns/0/bfc55f66d7ea47beaa439099d842ebbf/artifacts
+end_time: null
+entry_point_name: ''
+experiment_id: '0'
+lifecycle_stage: active
+run_id: bfc55f66d7ea47beaa439099d842ebbf
+run_name: indecisive-wren-815
+run_uuid: bfc55f66d7ea47beaa439099d842ebbf
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1721306993035
+status: 1
+tags: []
+user_id: dr.rub

@@ -4,7 +4,7 @@ import pandas as pd
 from models_zoo.unet import UNet
 from data.data import create_dataloader
 from train.train import Trainer, test_prediction
-from metrics.losses import CrossDice, DiceLoss
+from metrics.losses import CombinedLoss
 from torchinfo import summary
 import matplotlib
 matplotlib.use('Agg')
@@ -30,7 +30,7 @@ if __name__ == "__main__":
                              lr=1e-4)
 
     model_train = Trainer(model=model,
-                          loss_fn=CrossDice(),
+                          loss_fn=CombinedLoss(),
                           optimizer=optim,
                           device=DEVICE)
 
@@ -51,7 +51,7 @@ if __name__ == "__main__":
                  h_test,
                  "hystory")
 
-    test_prediction(model, test_dataloader, DiceLoss, "run_test")
+    test_prediction(model, test_dataloader, CombinedLoss(), "run_test")
 
     df = pd.DataFrame({'step': list(h_train.keys()), 'train_loss': list(h_train.values()), 'test_loss': list(h_test.values())})
     df.to_csv('./history.csv', index=False)

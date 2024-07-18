@@ -37,8 +37,8 @@ class Trainer:
         step_loss = 0
         n = 0
         for X, masks in dataloader:
-            X = torch.tensor(X, dtype=torch.float32)
-            masks = torch.tensor(masks, dtype=torch.float32)
+            X = X.type(torch.float32)
+            masks = masks.type(torch.float32)
             X = X.to(self.device)
             masks = masks.to(self.device)
             pred = self.model(X)
@@ -56,8 +56,8 @@ class Trainer:
         step_loss = 0
         n = 0
         for X, masks in dataloader:
-            X = torch.tensor(X, dtype=torch.float32)
-            masks = torch.tensor(masks, dtype=torch.float32)
+            X = X.type(torch.float32)
+            masks = masks.type(torch.float32)
             X = X.to(self.device)
             masks = masks.to(self.device)
             pred = self.model(X)
@@ -95,24 +95,24 @@ def test_prediction(model,
                     loss_fn,
                     image_name: str = "test_prediction"):
     model.to("cpu")
-    loss = 0
+    losses, loss = 0, 0
     n = 0
     for X, masks in dataloader:
-        X = torch.tensor(X, dtype=torch.float32)
-        masks = torch.tensor(masks, dtype=torch.float32)
-        Y_pred = model(X)
-        loss += loss_fn(Y_pred, masks).item()
+        X = X.type(torch.float32)
+        masks = masks.type(torch.float32)
+        pred = model(X)
+        loss = loss_fn(pred, masks)
+        losses += loss.item()
         n += 1
+    print("Loss per test: ", losses / n)
 
-    print("Loss per test: ", loss / n)
-
-    Y_pred = torch.squeeze(Y_pred, dim=-1)
-    Y_pred = Y_pred.detach().numpy()
+    pred = torch.squeeze(pred, dim=-1)
+    pred = pred.detach().numpy()
     masks = masks.numpy()
     _, axes = plt.subplots(2, 4, figsize=(8, 5))
     axes = axes.ravel()
     for i in range(4):
-        axes[i].imshow(Y_pred[i][0])
+        axes[i].imshow(pred[i][0])
         axes[i].axis("off")
         axes[i + 4].imshow(masks[i][0])
         axes[i + 4].axis("off")

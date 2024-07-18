@@ -1,0 +1,15 @@
+artifact_uri: file:///Users/dr.rub/Desktop/PlotExtract/mlruns/0/392492fe9dcc449499a1f230c9d7dd81/artifacts
+end_time: 1721306685645
+entry_point_name: ''
+experiment_id: '0'
+lifecycle_stage: active
+run_id: 392492fe9dcc449499a1f230c9d7dd81
+run_name: unruly-bee-372
+run_uuid: 392492fe9dcc449499a1f230c9d7dd81
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1721306685629
+status: 4
+tags: []
+user_id: dr.rub

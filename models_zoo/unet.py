@@ -107,6 +107,10 @@ class UNet(nn.Module):
 
 
 if __name__ == "__main__":
-
+    import torch
     model = UNet(depth=3)
     summary(model, input_size=(1, 3, 128, 128))
+
+    X = torch.randn(1, 3, 128, 128)
+    result = model(X)
+    print("Output shape: ", result.shape)

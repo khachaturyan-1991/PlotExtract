@@ -20,6 +20,6 @@ __pycache__/*.pyc
 ./models_zoo/__pycache__/*.pyc
 
 # data
-.plotextract
-./data
-./mlruns
+.plotextract/
+data
+mlruns/

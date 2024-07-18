@@ -1,0 +1,15 @@
+artifact_uri: file:///Users/dr.rub/Desktop/PlotExtract/mlruns/0/49f5544a78624f2eb6fcd4bd6414fa56/artifacts
+end_time: 1721254302709
+entry_point_name: ''
+experiment_id: '0'
+lifecycle_stage: active
+run_id: 49f5544a78624f2eb6fcd4bd6414fa56
+run_name: bustling-skink-150
+run_uuid: 49f5544a78624f2eb6fcd4bd6414fa56
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1721254299655
+status: 4
+tags: []
+user_id: dr.rub

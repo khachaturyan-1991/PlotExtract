@@ -2,8 +2,8 @@ import torch
 from torch import nn
 import tqdm
 
-import mlflow
-import mlflow.pytorch
+import mlflow  # type: ignore
+import mlflow.pytorch  # type: ignore
 
 import matplotlib.pylab as plt
 
@@ -14,13 +14,11 @@ class Trainer:
                  model: nn.Module,
                  loss_fn: nn.Module,
                  optimizer: torch.optim,
-                 device: str = "cpu:0",
-                 tb_log_dir: str = "./logs"
+                 device: str = "cpu:0"
                  ) -> None:
         self.model = model
         self.device = device
         self.loss_fn = loss_fn
-        self.model
         self.optimizer = optimizer
 
     def log_weights_and_gradients(self, step):
@@ -32,26 +30,19 @@ class Trainer:
                     mlflow.log_metric(f"{name}_grad_mean", param.grad.mean().item(), step=step)
                     mlflow.log_metric(f"{name}_grad_std", param.grad.std().item(), step=step)
 
-    def get_gradients(self):
-        gradients = []
-        for param in self.model.parameters():
-            if param.grad is not None:
-                gradients.append(param.grad.clone().detach())
-            else:
-                gradients.append(torch.zeros_like(param))
-        return torch.tensor([torch.mean(torch.abs(grad)) for grad in gradients])
-
     def train_step(self,
                    dataloader: torch.utils.data.DataLoader
                    ):
         self.model.train()
         step_loss = 0
         n = 0
-        for X, mask in dataloader:
+        for X, masks in dataloader:
+            X = torch.tensor(X, dtype=torch.float32)
+            masks = torch.tensor(masks, dtype=torch.float32)
             X = X.to(self.device)
-            mask = mask.to(self.device)
+            masks = masks.to(self.device)
             pred = self.model(X)
-            loss = self.loss_fn(pred, mask)
+            loss = self.loss_fn(pred, masks)
             step_loss += loss.item()
             loss.backward()
             self.optimizer.step()
@@ -64,11 +55,13 @@ class Trainer:
         self.model.eval()
         step_loss = 0
         n = 0
-        for X, mask in dataloader:
+        for X, masks in dataloader:
+            X = torch.tensor(X, dtype=torch.float32)
+            masks = torch.tensor(masks, dtype=torch.float32)
             X = X.to(self.device)
-            mask = mask.to(self.device)
+            masks = masks.to(self.device)
             pred = self.model(X)
-            loss = self.loss_fn(pred, mask)
+            loss = self.loss_fn(pred, masks)
             step_loss += loss.item()
             n += 1
         return step_loss / n
@@ -93,7 +86,6 @@ class Trainer:
                         Train loss: {train_loss:.4f} Validation loss: {test_loss:.4f}")
                     mlflow.log_metric("train_loss", train_loss, step=epoch)
                     mlflow.log_metric("validation_loss", test_loss, step=epoch)
-                    # self.log_weights_and_gradients(step=epoch)
             mlflow.pytorch.log_model(self.model, "models")
         return avg_train_loss, avg_val_loss
 
@@ -106,6 +98,8 @@ def test_prediction(model,
     loss = 0
     n = 0
     for X, masks in dataloader:
+        X = torch.tensor(X, dtype=torch.float32)
+        masks = torch.tensor(masks, dtype=torch.float32)
         Y_pred = model(X)
         loss += loss_fn(Y_pred, masks).item()
         n += 1
@@ -120,9 +114,7 @@ def test_prediction(model,
     for i in range(4):
         axes[i].imshow(Y_pred[i][0])
         axes[i].axis("off")
-        y = masks[i]
-        y[y > 1] = 1
-        axes[i + 4].imshow(y[0])
+        axes[i + 4].imshow(masks[i][0])
         axes[i + 4].axis("off")
     plt.tight_layout()
     plt.savefig(f"{image_name}.png")

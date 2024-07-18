@@ -1,0 +1,15 @@
+artifact_uri: file:///Users/dr.rub/Desktop/PlotExtract/mlruns/0/3c70ff6ba7594d4ba669bdc86f96949a/artifacts
+end_time: 1721254538249
+entry_point_name: ''
+experiment_id: '0'
+lifecycle_stage: active
+run_id: 3c70ff6ba7594d4ba669bdc86f96949a
+run_name: unruly-penguin-702
+run_uuid: 3c70ff6ba7594d4ba669bdc86f96949a
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1721254536858
+status: 4
+tags: []
+user_id: dr.rub

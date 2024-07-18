@@ -1,0 +1,15 @@
+artifact_uri: file:///Users/dr.rub/Desktop/PlotExtract/mlruns/0/9301f7125c01431b90ce3464d108930f/artifacts
+end_time: 1721254137937
+entry_point_name: ''
+experiment_id: '0'
+lifecycle_stage: active
+run_id: 9301f7125c01431b90ce3464d108930f
+run_name: bouncy-midge-536
+run_uuid: 9301f7125c01431b90ce3464d108930f
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1721254135069
+status: 4
+tags: []
+user_id: dr.rub

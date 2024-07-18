@@ -1,0 +1,15 @@
+artifact_uri: file:///Users/dr.rub/Desktop/PlotExtract/mlruns/0/0ab698111d9742e69e5b6f5729100830/artifacts
+end_time: 1721297002128
+entry_point_name: ''
+experiment_id: '0'
+lifecycle_stage: active
+run_id: 0ab698111d9742e69e5b6f5729100830
+run_name: dashing-conch-533
+run_uuid: 0ab698111d9742e69e5b6f5729100830
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1721297001364
+status: 4
+tags: []
+user_id: dr.rub

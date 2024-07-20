@@ -27,9 +27,9 @@ def plot_hystory(h_train: dict,
 def parse_arguments():
     parser = argparse.ArgumentParser()
     parser.add_argument("--framework", type=str, default="tensorflow", help="Choose between tensorflow and torch")
-    parser.add_argument("--model", type=str, default="autoencoder", help="Choose between autoencoder, autoencoder_wt, unet, unet_wt")
+    parser.add_argument("--fig_size", type=int, default=5, help="Plots size")
+    parser.add_argument("--depth", type=int, default=3, help="Depth of U-Net (encoder)")
     parser.add_argument("--device", type=str, default="cpu", help="cpu, gpu, mps")
-    parser.add_argument("--data_folder", type=str, default="../data/clothing/images")
     parser.add_argument("--batch_size", type=int, default=32, help="batch size")
     parser.add_argument("--img_size", type=int, default=128, help="image size")
     parser.add_argument("--epochs", type=int, default=30, help="number of epochs")

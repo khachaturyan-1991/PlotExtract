@@ -3,6 +3,8 @@ pip install opencv-python
 
 pip install tqdm
 
+pip install seaboarn
+
 # upyther
 pip install ipython
 pip install ipykernel

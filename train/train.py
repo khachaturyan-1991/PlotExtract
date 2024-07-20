@@ -49,6 +49,23 @@ class Trainer:
             n += 1
         return step_loss / n
 
+    def validationt_step(self,
+                         dataloader: torch.utils.data.DataLoader
+                         ):
+        self.model.eval()
+        step_loss = 0
+        n = 0
+        for X, masks in dataloader:
+            X = X.type(torch.float32)
+            masks = masks.type(torch.float32)
+            X = X.to(self.device)
+            masks = masks.to(self.device)
+            pred = self.model(X)
+            loss = self.loss_fn(pred, masks)
+            step_loss += loss.item()
+            n += 1
+        return step_loss / n
+
     def test_step(self,
                   dataloader: torch.utils.data.DataLoader,
                   ):
@@ -64,57 +81,44 @@ class Trainer:
             loss = self.loss_fn(pred, masks)
             step_loss += loss.item()
             n += 1
-        return step_loss / n
+        print("Loss per test: ", step_loss / n)
+        pred = pred.cpu()
+        masks = masks.cpu()
+        pred = torch.squeeze(pred, dim=-1)
+        pred = pred.detach().numpy()
+        masks = masks.numpy()
+        _, axes = plt.subplots(2, 4, figsize=(8, 5))
+        axes = axes.ravel()
+        for i in range(4):
+            axes[i].imshow(pred[i][0])
+            axes[i].axis("off")
+            axes[i + 4].imshow(masks[i])
+            axes[i + 4].axis("off")
+        plt.tight_layout()
+        plt.savefig("test_res.png")
 
     def fit(self,
             train_dataloder: torch.utils.data.DataLoader,
+            validation_dataloder: torch.utils.data.DataLoader,
             test_dataloder: torch.utils.data.DataLoader,
             output_freq: int = 2,
             first_step: int = 0,
-            epochs: int = 10):
-        with mlflow.start_run() as _:  # it was run
-            last_step = first_step + epochs
-            avg_train_loss = {}
-            avg_val_loss = {}
-            for epoch in tqdm.tqdm(range(epochs)):
-                train_loss = self.train_step(train_dataloder)
-                test_loss = self.test_step(test_dataloder)
-                avg_train_loss[first_step + epoch] = train_loss
-                avg_val_loss[first_step + epoch] = test_loss
-                if epoch % output_freq == 0:
-                    print(f"Epoch {epoch + 1 + first_step}/{first_step + last_step}, \
-                        Train loss: {train_loss:.4f} Validation loss: {test_loss:.4f}")
-                    mlflow.log_metric("train_loss", train_loss, step=epoch)
-                    mlflow.log_metric("validation_loss", test_loss, step=epoch)
-            mlflow.pytorch.log_model(self.model, "models")
+            epochs: int = 10,
+            run_description: str = "UNet"):
+        # with mlflow.start_run() as _:
+        last_step = first_step + epochs
+        avg_train_loss = {}
+        avg_val_loss = {}
+        for epoch in tqdm.tqdm(range(epochs)):
+            train_loss = self.train_step(train_dataloder)
+            validation_loss = self.validationt_step(validation_dataloder)
+            avg_train_loss[first_step + epoch] = train_loss
+            avg_val_loss[first_step + epoch] = validation_loss
+            if epoch % output_freq == 0:
+                print(f"Epoch {epoch + 1 + first_step}/{first_step + last_step}, \
+                    Train loss: {train_loss:.4f} Validation loss: {validation_loss:.4f}")
+            #         mlflow.log_metric("train_loss", train_loss, step=epoch)
+            #         mlflow.log_metric("validation_loss", validation_loss, step=epoch)
+            # mlflow.pytorch.log_model(self.model, "model")
+        self.test_step(test_dataloder)
         return avg_train_loss, avg_val_loss
-
-
-def test_prediction(model,
-                    dataloader,
-                    loss_fn,
-                    image_name: str = "test_prediction"):
-    model.to("cpu")
-    losses, loss = 0, 0
-    n = 0
-    for X, masks in dataloader:
-        X = X.type(torch.float32)
-        masks = masks.type(torch.float32)
-        pred = model(X)
-        loss = loss_fn(pred, masks)
-        losses += loss.item()
-        n += 1
-    print("Loss per test: ", losses / n)
-
-    pred = torch.squeeze(pred, dim=-1)
-    pred = pred.detach().numpy()
-    masks = masks.numpy()
-    _, axes = plt.subplots(2, 4, figsize=(8, 5))
-    axes = axes.ravel()
-    for i in range(4):
-        axes[i].imshow(pred[i][0])
-        axes[i].axis("off")
-        axes[i + 4].imshow(masks[i][0])
-        axes[i + 4].axis("off")
-    plt.tight_layout()
-    plt.savefig(f"{image_name}.png")

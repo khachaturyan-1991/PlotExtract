@@ -1,6 +1,8 @@
 from torch.functional import F
 from torch import nn
 from torchinfo import summary
+import cv2
+import numpy as np
 
 
 CONV_KERNEL = (3, 3)
@@ -8,6 +10,19 @@ POOL_KERNEL = (2, 2)
 STRIDE_SIZE = (1, 1)
 PADDING_TYPE = 1
 MODEL_DEPTH = 3
+
+
+def to_edge(img):
+    img = img.astype(np.uint8)
+    edges = cv2.Canny(img, threshold1=50, threshold2=150)
+    return edges
+
+
+def get_edges(i):
+    image = np.load(f"./data/train/image/{i}.npy") * 255
+    for i in range(3):
+        image[i] = to_edge(image[i])
+    return image / 255.
 
 
 class DownBlock(nn.Module):

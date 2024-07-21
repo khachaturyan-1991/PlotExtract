@@ -114,6 +114,8 @@ class Trainer:
             validation_loss = self.validationt_step(validation_dataloder)
             avg_train_loss[first_step + epoch] = train_loss
             avg_val_loss[first_step + epoch] = validation_loss
+            if (epoch + 1) % 100 == 0:
+                torch.save(self.model.state_dict(), f"./{epoch}.pth")
             if epoch % output_freq == 0:
                 print(f"Epoch {epoch + 1 + first_step}/{first_step + last_step}, \
                     Train loss: {train_loss:.4f} Validation loss: {validation_loss:.4f}")

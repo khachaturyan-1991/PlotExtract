@@ -35,8 +35,8 @@ class GenerateDataset(Dataset):
 
         # Create figure
         fig, ax = plt.subplots(figsize=self.fig_size)
-        ax.set_xlim(-10, 10)
-        ax.set_ylim(-10, 10)
+        ax.set_xlim(1, 10)
+        ax.set_ylim(1, 10)
         # np.random.rand(3,)
         line_color = [0.0, 0.0, 1.0]
         ax.plot(x, y_linear, color=line_color)
@@ -56,7 +56,7 @@ class GenerateDataset(Dataset):
         mask = np.zeros(image.shape[:2], dtype=np.uint8)
         mask[image[:, :, 0] == 0] = 1
         mask[self.within_tolerance(image, line_color, self.tolerance)] = 2
-        mask[self.within_tolerance(image, parab_color, self.tolerance)] = 3
+        # mask[self.within_tolerance(image, parab_color, self.tolerance)] = 3
 
         image = torch.from_numpy(image).permute(2, 0, 1).float() / 255.0
         mask = torch.from_numpy(mask).long()
@@ -66,7 +66,7 @@ class GenerateDataset(Dataset):
         return image, mask
 
 
-def create_data(mode: str = "train", num_samples: int = 1000, img_size: int = 128, fig_size: int = 5):
+def generate_data(mode: str = "train", num_samples: int = 1000, img_size: int = 128, fig_size: int = 5):
     dataset = GenerateDataset(num_samples=num_samples, img_size=img_size, fig_size=fig_size)
     if not os.path.exists(f"./{mode}"):
         os.mkdir(f"./{mode}")
@@ -83,11 +83,11 @@ def create_data(mode: str = "train", num_samples: int = 1000, img_size: int = 12
 
 
 class LoadDataset(Dataset):
-    def __init__(self, num_samples=10, transform=None, img_size: int = 128):
+    def __init__(self, mode: str = "train", num_samples=10, transform=None, img_size: int = 128):
         super(Dataset, self).__init__()
         self.transform = transform
         self.img_size = (img_size, img_size)
-        self.image_paths = glob.glob("./data/train/image/*.npy")[:num_samples]
+        self.image_paths = glob.glob(f"./data/{mode}/image/*.npy")[:num_samples]
 
     def __len__(self):
         return len(self.image_paths)
@@ -104,18 +104,20 @@ class LoadDataset(Dataset):
 def create_dataloader(num_samples: int = 32,
                       batch_size: int = 32,
                       shuffle: bool = False,
-                      img_size: int = 128
+                      img_size: int = 128,
+                      mode: str = "train"
                       ):
-    dataset = LoadDataset(num_samples=num_samples, img_size=img_size)
+    dataset = LoadDataset(mode=mode, num_samples=num_samples, img_size=img_size)
+    print(dataset.__len__())
     return DataLoader(dataset, batch_size=batch_size, shuffle=shuffle)
 
 
 if __name__ == "__main__":
     import os
     img_size = 128
-    create_data(mode="train", num_samples=1280, img_size=img_size, fig_size=2)
-    create_data(mode="test", num_samples=128, img_size=img_size, fig_size=2)
-    create_data(mode="validation", num_samples=128, img_size=img_size, fig_size=2)
+    generate_data(mode="train", num_samples=1280, img_size=img_size, fig_size=2)
+    generate_data(mode="test", num_samples=128, img_size=img_size, fig_size=2)
+    generate_data(mode="validation", num_samples=128, img_size=img_size, fig_size=2)
 
     # dataloader = create_dataloader(img_size=512)
 

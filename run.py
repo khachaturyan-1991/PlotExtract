@@ -23,9 +23,9 @@ if __name__ == "__main__":
 
     print("Running on: ", DEVICE)
 
-    train_dataloader = create_dataloader(num_samples=1280, batch_size=BATCH_SIZE, shuffle=True, img_size=IMG_SIZE)
-    test_dataloader = create_dataloader(num_samples=128, batch_size=BATCH_SIZE, shuffle=False, img_size=IMG_SIZE)
-    val_dataloader = create_dataloader(num_samples=128, batch_size=BATCH_SIZE, shuffle=False, img_size=IMG_SIZE)
+    train_dataloader = create_dataloader(mode="train", num_samples=1280, batch_size=BATCH_SIZE, shuffle=True, img_size=IMG_SIZE)
+    test_dataloader = create_dataloader(mode="test", num_samples=128, batch_size=BATCH_SIZE, shuffle=False, img_size=IMG_SIZE)
+    val_dataloader = create_dataloader(mode="validation", num_samples=128, batch_size=BATCH_SIZE, shuffle=False, img_size=IMG_SIZE)
 
     model = UNet(depth=DEPTH)
     summary(model, input_size=(1, 3, 128, 128))
@@ -33,7 +33,7 @@ if __name__ == "__main__":
 
     model.to(device=DEVICE)
     optim = torch.optim.Adam(params=model.parameters(),
-                             lr=1e-4)
+                             lr=3e-4)
 
     model_train = Trainer(model=model,
                           loss_fn=CombinedLoss(),

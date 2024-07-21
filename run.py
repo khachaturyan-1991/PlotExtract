@@ -23,6 +23,7 @@ if __name__ == "__main__":
     DEPTH = args.depth
     RUN_DESCRIPTION = args.run_description
     EXPERIMENT_NAME = args.experiment_name
+    LR = args.lr
 
     time_stamp = datetime.datetime.now()
     run_name = time_stamp.strftime("%H-%M-%m-%Y")
@@ -39,19 +40,20 @@ if __name__ == "__main__":
                     "depth": DEPTH,
                     "batch_size": BATCH_SIZE,
                     "run_name": run_name,
-                    "run_description": run_description}
+                    "run_description": run_description,
+                    "learning_rate": LR}
 
     train_dataloader = create_dataloader(mode="train", num_samples=1280, batch_size=BATCH_SIZE, shuffle=True, img_size=IMG_SIZE)
     test_dataloader = create_dataloader(mode="test", num_samples=128, batch_size=BATCH_SIZE, shuffle=False, img_size=IMG_SIZE)
     val_dataloader = create_dataloader(mode="validation", num_samples=128, batch_size=BATCH_SIZE, shuffle=False, img_size=IMG_SIZE)
 
     model = UNet(depth=DEPTH)
-    summary(model, input_size=(1, 3, 128, 128))
+    summary(model, input_size=(1, 3, IMG_SIZE, IMG_SIZE))
     count_torch_parameters(model)
 
     model.to(device=DEVICE)
     optim = torch.optim.Adam(params=model.parameters(),
-                             lr=3e-4)
+                             lr=LR)
 
     model_train = Trainer(model=model,
                           loss_fn=CombinedLoss(),

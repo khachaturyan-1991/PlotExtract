@@ -117,8 +117,9 @@ class Trainer:
             mlflow.set_tag("mlflow.note.content", self.mlf["run_description"])
             mlflow.log_param("img_size", self.mlf["img_size"])
             mlflow.log_param("fig_size", self.mlf["fig_size"])
-            mlflow.log_param("device", self.device)
             mlflow.log_param("loss_fn", "Combined")
+            mlflow.log_param("learning_rate", self.mlf["learning_rate"])
+            mlflow.log_param("device", self.device)
             for epoch in tqdm.tqdm(range(epochs)):
                 train_loss = self.train_step(train_dataloder)
                 validation_loss = self.validationt_step(validation_dataloder)

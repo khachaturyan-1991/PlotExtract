@@ -14,12 +14,17 @@ class Trainer:
                  model: nn.Module,
                  loss_fn: nn.Module,
                  optimizer: torch.optim,
-                 device: str = "cpu:0"
+                 device: str = "cpu:0",
+                 **kwargs
                  ) -> None:
         self.model = model
         self.device = device
         self.loss_fn = loss_fn
         self.optimizer = optimizer
+        self.mlf = kwargs
+        mlflow.set_tracking_uri("./mlruns")
+        print("ARGS: ", self.mlf)
+        mlflow.set_experiment("Experiment")
 
     def log_weights_and_gradients(self, step):
         for name, param in self.model.named_parameters():
@@ -103,24 +108,29 @@ class Trainer:
             test_dataloder: torch.utils.data.DataLoader,
             output_freq: int = 2,
             first_step: int = 0,
-            epochs: int = 10,
-            run_description: str = "UNet"):
+            epochs: int = 10):
         # with mlflow.start_run() as _:
         last_step = first_step + epochs
         avg_train_loss = {}
         avg_val_loss = {}
-        for epoch in tqdm.tqdm(range(epochs)):
-            train_loss = self.train_step(train_dataloder)
-            validation_loss = self.validationt_step(validation_dataloder)
-            avg_train_loss[first_step + epoch] = train_loss
-            avg_val_loss[first_step + epoch] = validation_loss
-            if (epoch + 1) % 100 == 0:
-                torch.save(self.model.state_dict(), f"./{epoch}.pth")
-            if epoch % output_freq == 0:
-                print(f"Epoch {epoch + 1 + first_step}/{first_step + last_step}, \
+        with mlflow.start_run(run_name=self.mlf["run_name"]) as _:
+            mlflow.set_tag("mlflow.note.content", self.mlf["run_description"])
+            mlflow.log_param("img_size", self.mlf["img_size"])
+            mlflow.log_param("fig_size", self.mlf["fig_size"])
+            mlflow.log_param("device", self.device)
+            mlflow.log_param("loss_fn", "Combined")
+            for epoch in tqdm.tqdm(range(epochs)):
+                train_loss = self.train_step(train_dataloder)
+                validation_loss = self.validationt_step(validation_dataloder)
+                avg_train_loss[first_step + epoch] = train_loss
+                avg_val_loss[first_step + epoch] = validation_loss
+                if (epoch + 1) % 100 == 0:
+                    torch.save(self.model.state_dict(), f"./{epoch}.pth")
+                if epoch % output_freq == 0:
+                    print(f"Epoch {epoch + 1 + first_step}/{first_step + last_step}, \
                     Train loss: {train_loss:.4f} Validation loss: {validation_loss:.4f}")
-            #         mlflow.log_metric("train_loss", train_loss, step=epoch)
-            #         mlflow.log_metric("validation_loss", validation_loss, step=epoch)
-            # mlflow.pytorch.log_model(self.model, "model")
+                    mlflow.log_metric("train_loss", train_loss, step=epoch)
+                    mlflow.log_metric("validation_loss", validation_loss, step=epoch)
+                # mlflow.pytorch.log_model(self.model, "model")
         self.test_step(test_dataloder)
         return avg_train_loss, avg_val_loss

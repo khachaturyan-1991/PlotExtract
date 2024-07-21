@@ -35,6 +35,8 @@ def parse_arguments():
     parser.add_argument("--epochs", type=int, default=30, help="number of epochs")
     parser.add_argument("--output_freq", type=int, default=2, help="output frequency")
     parser.add_argument("--save_history", type=str, default=None, help="name of the file to save history")
+    parser.add_argument("--run_description", type=str, default=None, help="Name of the file with mlflow experiment description")
+    parser.add_argument("--experiment_name", type=str, default="Experiments", help="Name of agglomirated experiments")
     args = parser.parse_args()
     return args
 
@@ -58,3 +60,10 @@ def count_torch_parameters(model):
     print(f"Non-trainable parameters: {non_trainable_params}")
     print(f"Trainable weights (Mb): {trainable_weights / 1e6}")
     print(f"Non-trainable weights (Mb): {non_trainable_weights / 1e6}")
+
+
+def read_run_description(file_name: str = "description.txt"):
+    with open(file_name, "r") as f:
+        text = f.read()
+    f.close()
+    return text

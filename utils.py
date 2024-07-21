@@ -37,6 +37,7 @@ def parse_arguments():
     parser.add_argument("--save_history", type=str, default=None, help="name of the file to save history")
     parser.add_argument("--run_description", type=str, default=None, help="Name of the file with mlflow experiment description")
     parser.add_argument("--experiment_name", type=str, default="Experiments", help="Name of agglomirated experiments")
+    parser.add_argument("--lr", type=float, default=3e-4, help="Learning rate")
     args = parser.parse_args()
     return args
 

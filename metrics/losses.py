@@ -4,38 +4,39 @@ import torch.nn.functional as F
 
 
 class DiceLoss(nn.Module):
-    def __init__(self, num_classes, smooth=1):
+    def __init__(self, smooth=1):
         super(DiceLoss, self).__init__()
-        self.num_classes = num_classes
         self.smooth = smooth
 
     def forward(self, logits, targets):
-        assert targets.max() < self.num_classes and targets.min() >= 0, "Targets contain invalid class indices"
-        logits = F.softmax(logits, dim=1)
-        targets_one_hot = F.one_hot(targets, num_classes=self.num_classes).permute(0, 3, 1, 2).float()
-        intersection = (logits * targets_one_hot).sum(dim=(2, 3))
-        union = logits.sum(dim=(2, 3)) + targets_one_hot.sum(dim=(2, 3))
+        logits = logits.squeeze(dim=1)
+        logits = torch.sigmoid(logits)
+        targets = torch.sigmoid(targets)
+        intersection = (logits * targets).sum(dim=(1, 2))
+        union = logits.sum(dim=(1, 2)) + targets.sum(dim=(1, 2))
         dice = (2. * intersection + self.smooth) / (union + self.smooth)
         return 1 - dice.mean()
 
 
 class CombinedLoss(nn.Module):
-    def __init__(self, num_classes: int = 3, alpha=0.5):
+    def __init__(self, dice_weight=0.5, cross_entropy_weight=0.5):
         super(CombinedLoss, self).__init__()
-        self.dice_loss = DiceLoss(num_classes)
-        self.ce_loss = nn.CrossEntropyLoss()
-        self.alpha = alpha
+        self.dice_loss = DiceLoss()
+        self.cross_entropy_loss = nn.CrossEntropyLoss()
+        self.dice_weight = dice_weight
+        self.cross_entropy_weight = cross_entropy_weight
 
     def forward(self, logits, targets):
-        targets = targets.long()
-        dice = self.dice_loss(logits, targets)
-        ce = self.ce_loss(logits, targets)
-        return self.alpha * ce + (1 - self.alpha) * dice
+        dice_loss_value = self.dice_loss(logits, targets)
+        logits_flat = logits.view(-1, 1, 128, 128)
+        targets_flat = targets.view(-1, 128, 128).long()
+        cross_entropy_loss_value = self.cross_entropy_loss(logits_flat, targets_flat)
+        return self.dice_weight * dice_loss_value + self.cross_entropy_weight * cross_entropy_loss_value
 
 
 if __name__ == "__main__":
 
-    num_classes = 3
+    num_classes = 1
     output = torch.randn(32, num_classes, 128, 128)
     mask = torch.randint(0, num_classes, (32, 128, 128))
 

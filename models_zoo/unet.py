@@ -94,7 +94,7 @@ class UNet(nn.Module):
         for i in range(1, depth):
             self.up_block[str(depth - i)] = UpperBlock(2 * n_feat, n_feat)
             n_feat //= 2
-        self.up_block[str(0)] = UpperBlock(64, 3)
+        self.up_block[str(0)] = UpperBlock(64, 1)
 
     def forward(self, x):
         x = self.down_blocks[str(0)](x)

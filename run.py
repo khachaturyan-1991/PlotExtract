@@ -35,7 +35,7 @@ if __name__ == "__main__":
     print("Running on: ", DEVICE)
     print("With Run Time: ", run_name)
 
-    mlflow_input = {"experiment_name": "Experiment",
+    mlflow_input = {"experiment_name": "1_channel",
                     "img_size": IMG_SIZE,
                     "fig_size": FIG_SIZE,
                     "depth": DEPTH,

@@ -115,7 +115,7 @@ def create_dataloader(num_samples: int = 32,
 
 
 if __name__ == "__main__":
-    import os
+
     img_size = 128
     generate_data(mode="train", num_samples=1280, img_size=img_size, fig_size=2)
     generate_data(mode="test", num_samples=128, img_size=img_size, fig_size=2)

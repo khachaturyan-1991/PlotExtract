@@ -2,6 +2,7 @@ import numpy as np
 import torch
 import glob
 import cv2
+import os
 from torch.utils.data import Dataset, DataLoader
 import matplotlib.pyplot as plt
 import torch.nn.functional as F
@@ -25,8 +26,8 @@ class GenerateDataset(Dataset):
 
     def __getitem__(self, idx):
         # Generate random coefficients
-        a1, a2 = np.random.uniform(1, 10, 2)
-        a3, a4, a5 = np.random.uniform(0.1, 1, 3)
+        a1, a2 = np.random.uniform(1, 5, 2)
+        a3, a4, a5 = np.random.uniform(-1, 1, 3)
 
         x = np.linspace(-10, 10, 100)
 
@@ -35,8 +36,8 @@ class GenerateDataset(Dataset):
 
         # Create figure
         fig, ax = plt.subplots(figsize=self.fig_size)
-        ax.set_xlim(1, 10)
-        ax.set_ylim(1, 10)
+        ax.set_xlim(-10, 10)
+        ax.set_ylim(-10, 10)
         # np.random.rand(3,)
         line_color = [0.0, 0.0, 1.0]
         ax.plot(x, y_linear, color=line_color)

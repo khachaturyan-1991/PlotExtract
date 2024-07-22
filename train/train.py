@@ -23,7 +23,6 @@ class Trainer:
         self.optimizer = optimizer
         self.mlf = kwargs
         mlflow.set_tracking_uri("./mlruns")
-        print("ARGS: ", self.mlf)
         mlflow.set_experiment("Experiment")
 
     def log_weights_and_gradients(self, step):
@@ -126,7 +125,9 @@ class Trainer:
                 avg_train_loss[first_step + epoch] = train_loss
                 avg_val_loss[first_step + epoch] = validation_loss
                 if (epoch + 1) % 100 == 0:
-                    torch.save(self.model.state_dict(), f"./{epoch}.pth")
+                    saved_under = "./intermediate.pth"
+                    torch.save(self.model.state_dict(), saved_under)
+                    mlflow.log_artifact(saved_under)
                 if epoch % output_freq == 0:
                     print(f"Epoch {epoch + 1 + first_step}/{first_step + last_step}, \
                     Train loss: {train_loss:.4f} Validation loss: {validation_loss:.4f}")
@@ -134,4 +135,7 @@ class Trainer:
                     mlflow.log_metric("validation_loss", validation_loss, step=epoch)
                 # mlflow.pytorch.log_model(self.model, "model")
         self.test_step(test_dataloder)
+        saved_under = f"./{self.mlf['run_name']}.pth"
+        torch.save(self.model.state_dict(), saved_under)
+        mlflow.log_artifact(saved_under)
         return avg_train_loss, avg_val_loss

@@ -1,5 +1,7 @@
 import matplotlib.pylab as plt
 import argparse
+import os
+import torch
 
 
 def plot_hystory(h_train: dict,
@@ -38,6 +40,7 @@ def parse_arguments():
     parser.add_argument("--run_description", type=str, default=None, help="Name of the file with mlflow experiment description")
     parser.add_argument("--experiment_name", type=str, default="Experiments", help="Name of agglomirated experiments")
     parser.add_argument("--lr", type=float, default=3e-4, help="Learning rate")
+    parser.add_argument("--weights", type=str, default=None, help="Weights of a pretrianed model")
     args = parser.parse_args()
     return args
 
@@ -68,3 +71,11 @@ def read_run_description(file_name: str = "description.txt"):
         text = f.read()
     f.close()
     return text
+
+
+def load_model(model: torch.nn.Module, file_name: str):
+    assert os.path.exists(file_name), "No weights were found"
+    state_dict = torch.load(file_name, weights_only=True)
+    model.load_state_dict(state_dict)
+    print("Models is loaded from: ", file_name)
+    return model

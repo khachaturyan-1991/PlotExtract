@@ -25,8 +25,8 @@ class GenerateDataset(Dataset):
 
     def __getitem__(self, idx):
         # Generate random coefficients
-        a1, a2 = np.random.uniform(-10, 10, 2)
-        a3, a4, a5 = np.random.uniform(-1, 1, 3)
+        a1, a2 = np.random.uniform(1, 10, 2)
+        a3, a4, a5 = np.random.uniform(0.1, 1, 3)
 
         x = np.linspace(-10, 10, 100)
 
@@ -56,7 +56,7 @@ class GenerateDataset(Dataset):
         mask = np.zeros(image.shape[:2], dtype=np.uint8)
         mask[image[:, :, 0] == 0] = 1
         mask[self.within_tolerance(image, line_color, self.tolerance)] = 2
-        # mask[self.within_tolerance(image, parab_color, self.tolerance)] = 3
+        mask[self.within_tolerance(image, parab_color, self.tolerance)] = 3
 
         image = torch.from_numpy(image).permute(2, 0, 1).float() / 255.0
         mask = torch.from_numpy(mask).long()
@@ -72,6 +72,7 @@ def generate_data(mode: str = "train", num_samples: int = 1000, img_size: int = 
         os.mkdir(f"./{mode}")
         os.mkdir(f"./{mode}/image")
         os.mkdir(f"./{mode}/mask")
+    dataset = GenerateDataset(num_samples=num_samples, img_size=img_size, fig_size=fig_size)
     i = 0
     for img, mask in dataset:
         np.save(f'./{mode}/image/{i}.npy', img)
@@ -119,36 +120,31 @@ if __name__ == "__main__":
     generate_data(mode="test", num_samples=128, img_size=img_size, fig_size=2)
     generate_data(mode="validation", num_samples=128, img_size=img_size, fig_size=2)
 
-    # dataloader = create_dataloader(img_size=512)
+    dataloader = create_dataloader(img_size=512)
 
-    # for images, masks in dataloader:
-    #     print(images.shape, masks.shape)
-    #     break
+    for images, masks in dataloader:
+        print(images.shape, masks.shape)
+        break
 
-    # print("Individual image size: ", images.shape, images.max(), images.min())
-    # print("Corresponding mask size: ", masks.shape, masks.max(), masks.min())
+    print("Individual image size: ", images.shape, images.max(), images.min())
+    print("Corresponding mask size: ", masks.shape, masks.max(), masks.min())
 
-    # n = 2
-    # fig, axes = plt.subplots(4, n, figsize=(9, 5))
-    # axes = axes.ravel()
-    # for i in range(n):
-    #     axes[i].imshow(images[i].permute(1, 2, 0))
-    #     axes[i].axis("off")
-    #     axes[i + n].imshow(255 * masks[i])
-    #     axes[i + n].axis("off")
-    #     axes[i + n].set_title(f"{np.unique(masks[i])}")
+    n = 2
+    fig, axes = plt.subplots(4, n, figsize=(9, 5))
+    axes = axes.ravel()
+    for i in range(n):
+        axes[i].imshow(images[i].permute(1, 2, 0))
+        axes[i].axis("off")
+        axes[i + n].imshow(255 * masks[i])
+        axes[i + n].axis("off")
+        axes[i + n].set_title(f"{np.unique(masks[i])}")
 
-    # for i in range(n):
-    #     axes[i + 2 * n].imshow(images[i + 6].permute(1, 2, 0))
-    #     axes[i + 2 * n].axis("off")
-    #     axes[i + 3 * n].imshow(255 * masks[i + 6])
-    #     axes[i + 3 * n].axis("off")
-    #     axes[i + 3 * n].set_title(f"{np.unique(masks[i + 6])}")
+    for i in range(n):
+        axes[i + 2 * n].imshow(images[i + 6].permute(1, 2, 0))
+        axes[i + 2 * n].axis("off")
+        axes[i + 3 * n].imshow(255 * masks[i + 6])
+        axes[i + 3 * n].axis("off")
+        axes[i + 3 * n].set_title(f"{np.unique(masks[i + 6])}")
 
-    # plt.tight_layout()
-    # plt.savefig("generated_example.png")
-
-    # fig = plt.figure()
-    # plt.imshow(images[i + 6].permute(1, 2, 0))
-    # plt.tight_layout()
-    # plt.savefig("torm.png")
+    plt.tight_layout()
+    plt.savefig("generated_example.png")

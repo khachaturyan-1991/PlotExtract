@@ -1,5 +1,5 @@
 import torch
-from utils import plot_hystory, parse_arguments, count_torch_parameters, read_run_description
+from utils import plot_hystory, parse_arguments, count_torch_parameters, read_run_description, load_model
 from models_zoo.unet import UNet
 from data.data import create_dataloader
 from train.train import Trainer
@@ -24,6 +24,7 @@ if __name__ == "__main__":
     RUN_DESCRIPTION = args.run_description
     EXPERIMENT_NAME = args.experiment_name
     LR = args.lr
+    WEIGHTS = args.weights
 
     time_stamp = datetime.datetime.now()
     run_name = time_stamp.strftime("%H-%M-%m-%Y")
@@ -48,6 +49,8 @@ if __name__ == "__main__":
     val_dataloader = create_dataloader(mode="validation", num_samples=128, batch_size=BATCH_SIZE, shuffle=False, img_size=IMG_SIZE)
 
     model = UNet(depth=DEPTH)
+    if isinstance(WEIGHTS, str):
+        model = load_model(model=model, file_name=WEIGHTS)
     summary(model, input_size=(1, 3, IMG_SIZE, IMG_SIZE))
     count_torch_parameters(model)
 
@@ -62,15 +65,12 @@ if __name__ == "__main__":
                           **mlflow_input)
 
     FIRST_STEP = 0
-    experiment_description = f"U-Net depth: {DEPTH}, Image size: {IMG_SIZE}; Plot size: {FIG_SIZE}"
     h_train, h_test = model_train.fit(train_dataloder=train_dataloader,
                                       validation_dataloder=val_dataloader,
                                       test_dataloder=test_dataloader,
                                       output_freq=OUTPUT_FREQUENCY,
                                       epochs=EPOCHS,
                                       first_step=FIRST_STEP)
-
-    torch.save(model.state_dict(), f"./{DEPTH}_{IMG_SIZE}_{FIG_SIZE}.pth")
 
     plot_hystory(h_train,
                  h_test,

@@ -10,8 +10,8 @@ class DiceLoss(nn.Module):
         self.smooth = smooth
 
     def forward(self, logits, targets):
+        assert targets.max() < self.num_classes and targets.min() >= 0, "Targets contain invalid class indices"
         logits = F.softmax(logits, dim=1)
-
         targets_one_hot = F.one_hot(targets, num_classes=self.num_classes).permute(0, 3, 1, 2).float()
         intersection = (logits * targets_one_hot).sum(dim=(2, 3))
         union = logits.sum(dim=(2, 3)) + targets_one_hot.sum(dim=(2, 3))

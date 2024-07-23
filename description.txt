@@ -1,1 +1,5 @@
-Running first experiment to test MLFlow functionality;
+Dice in Combination with Cross entropy anyway does not give a proper separation of plots. Segmentation looks fine, but values of are not corresponding to axes and plots at least for one plot.
+So I try now to use only DiceLoss in combination with Sigmoid for dice just to perform segmentation. Separation of the plots should be done somehow else.
+However, it is not yet clear to my why plots separation does not work.
+
+The first 100 shows good result. So this run continues it

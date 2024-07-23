@@ -103,6 +103,7 @@ class UNet(nn.Module):
         for i in range(1, self.depth):
             x = self.up_block[str(self.depth - i)](x)
         x = self.up_block[str(0)](x)
+        x = F.sigmoid(x)
         return x
 
 

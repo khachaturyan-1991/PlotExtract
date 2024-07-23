@@ -99,6 +99,7 @@ class LoadDataset(Dataset):
         image = np.load(img_path)
         mask_path = img_path.replace("image", "mask")
         mask = np.load(mask_path)
+        mask[mask > 0] = 1
         _, image = cv2.threshold(image, 0.7, 1, cv2.THRESH_BINARY)
         return image, mask
 

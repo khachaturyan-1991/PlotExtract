@@ -3,7 +3,7 @@ from torch import nn
 
 
 class DiceLoss(nn.Module):
-    def __init__(self, smooth=1):
+    def __init__(self, smooth: float = 1e-5):
         super(DiceLoss, self).__init__()
         self.smooth = smooth
 
@@ -11,12 +11,12 @@ class DiceLoss(nn.Module):
         logit_sum = torch.squeeze(logits, dim=1)
         intersection = (logit_sum * targets).sum(dim=(1, 2))
         union = logit_sum.sum(dim=(1, 2)) + targets.sum(dim=(1, 2))
-        dice = (2. * intersection + 1e-3) / (union + 1e-3)
+        dice = (2. * intersection + self.smooth) / (union + self.smooth)
         return 1 - dice.mean()
 
 
 class CombinedLoss(nn.Module):
-    def __init__(self, dice_weight=0.9):
+    def __init__(self, dice_weight: float = 0.9):
         super(CombinedLoss, self).__init__()
         self.dice_loss = DiceLoss()
         self.cross_entropy_loss = nn.CrossEntropyLoss()

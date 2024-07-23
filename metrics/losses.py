@@ -1,6 +1,5 @@
 import torch
 from torch import nn
-import torch.nn.functional as F
 
 
 class DiceLoss(nn.Module):
@@ -9,29 +8,26 @@ class DiceLoss(nn.Module):
         self.smooth = smooth
 
     def forward(self, logits, targets):
-        logits = logits.squeeze(dim=1)
-        logits = torch.sigmoid(logits)
-        targets = torch.sigmoid(targets)
-        intersection = (logits * targets).sum(dim=(1, 2))
-        union = logits.sum(dim=(1, 2)) + targets.sum(dim=(1, 2))
-        dice = (2. * intersection + self.smooth) / (union + self.smooth)
+        logit_sum = torch.squeeze(logits, dim=1)
+        intersection = (logit_sum * targets).sum(dim=(1, 2))
+        union = logit_sum.sum(dim=(1, 2)) + targets.sum(dim=(1, 2))
+        dice = (2. * intersection + 1e-3) / (union + 1e-3)
         return 1 - dice.mean()
 
 
 class CombinedLoss(nn.Module):
-    def __init__(self, dice_weight=0.5, cross_entropy_weight=0.5):
+    def __init__(self, dice_weight=0.9):
         super(CombinedLoss, self).__init__()
         self.dice_loss = DiceLoss()
         self.cross_entropy_loss = nn.CrossEntropyLoss()
         self.dice_weight = dice_weight
-        self.cross_entropy_weight = cross_entropy_weight
 
     def forward(self, logits, targets):
         dice_loss_value = self.dice_loss(logits, targets)
-        logits_flat = logits.view(-1, 1, 128, 128)
-        targets_flat = targets.view(-1, 128, 128).long()
-        cross_entropy_loss_value = self.cross_entropy_loss(logits_flat, targets_flat)
-        return self.dice_weight * dice_loss_value + self.cross_entropy_weight * cross_entropy_loss_value
+        logits = torch.squeeze(logits, dim=1)
+        targets = targets.float()
+        cross_entropy_loss_value = self.cross_entropy_loss(logits, targets)
+        return self.dice_weight * dice_loss_value + (1 - self.dice_weight) * cross_entropy_loss_value
 
 
 if __name__ == "__main__":

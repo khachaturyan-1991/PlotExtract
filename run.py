@@ -25,13 +25,14 @@ if __name__ == "__main__":
     EXPERIMENT_NAME = args.experiment_name
     LR = args.lr
     WEIGHTS = args.weights
+    DICE_COEF = args.dice_coef
 
     time_stamp = datetime.datetime.now()
-    run_name = time_stamp.strftime("%H-%M-%m-%Y")
+    run_name = time_stamp.strftime("%H-%M-%d-%m-%Y")
     if RUN_DESCRIPTION:
         run_description = read_run_description()
     else:
-        run_description = f"depth: {DEPTH} img_size: {IMG_SIZE} fig_size: {FIG_SIZE} batch_size: {BATCH_SIZE}"
+        run_description = f"DicePart: {DICE_COEF}"
     print("Running on: ", DEVICE)
     print("With Run Time: ", run_name)
 
@@ -42,7 +43,8 @@ if __name__ == "__main__":
                     "batch_size": BATCH_SIZE,
                     "run_name": run_name,
                     "run_description": run_description,
-                    "learning_rate": LR}
+                    "learning_rate": LR,
+                    "dice_coef": DICE_COEF}
 
     train_dataloader = create_dataloader(mode="train", num_samples=1280, batch_size=BATCH_SIZE, shuffle=True, img_size=IMG_SIZE)
     test_dataloader = create_dataloader(mode="test", num_samples=128, batch_size=BATCH_SIZE, shuffle=False, img_size=IMG_SIZE)

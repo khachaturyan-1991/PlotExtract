@@ -108,17 +108,13 @@ class Trainer:
             output_freq: int = 2,
             first_step: int = 0,
             epochs: int = 10):
-        # with mlflow.start_run() as _:
         last_step = first_step + epochs
         avg_train_loss = {}
         avg_val_loss = {}
         with mlflow.start_run(run_name=self.mlf["run_name"]) as _:
+            for key in self.mlf.keys():
+                mlflow.log_param(key, self.mlf[key])
             mlflow.set_tag("mlflow.note.content", self.mlf["run_description"])
-            mlflow.log_param("img_size", self.mlf["img_size"])
-            mlflow.log_param("fig_size", self.mlf["fig_size"])
-            mlflow.log_param("loss_fn", "Combined")
-            mlflow.log_param("learning_rate", self.mlf["learning_rate"])
-            mlflow.log_param("dice_coef", self.mlf["dice_coef"])
             mlflow.log_param("device", self.device)
             for epoch in tqdm.tqdm(range(epochs)):
                 train_loss = self.train_step(train_dataloder)

@@ -23,7 +23,7 @@ class Trainer:
         self.optimizer = optimizer
         self.mlf = kwargs
         mlflow.set_tracking_uri("./mlruns")
-        mlflow.set_experiment("Experiment")
+        mlflow.set_experiment(self.mlf["experiment_name"])
 
     def log_weights_and_gradients(self, step):
         for name, param in self.model.named_parameters():
@@ -118,6 +118,7 @@ class Trainer:
             mlflow.log_param("fig_size", self.mlf["fig_size"])
             mlflow.log_param("loss_fn", "Combined")
             mlflow.log_param("learning_rate", self.mlf["learning_rate"])
+            mlflow.log_param("dice_coef", self.mlf["dice_coef"])
             mlflow.log_param("device", self.device)
             for epoch in tqdm.tqdm(range(epochs)):
                 train_loss = self.train_step(train_dataloder)

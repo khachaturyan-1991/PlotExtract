@@ -41,6 +41,7 @@ def parse_arguments():
     parser.add_argument("--experiment_name", type=str, default="Experiments", help="Name of agglomirated experiments")
     parser.add_argument("--lr", type=float, default=3e-4, help="Learning rate")
     parser.add_argument("--weights", type=str, default=None, help="Weights of a pretrianed model")
+    parser.add_argument("--dice_coef", type=float, default=0.9, help="Dice Loss contribution")
     args = parser.parse_args()
     return args
 

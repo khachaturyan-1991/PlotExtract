@@ -11,7 +11,7 @@ matplotlib.use('Agg')
 
 
 class GenerateDataset(Dataset):
-    def __init__(self, num_samples, transform=None, tolerance=150, img_size=128, fig_size=5):
+    def __init__(self, num_samples, transform=None, tolerance=50, img_size=128, fig_size=5):
         self.num_samples = num_samples
         self.transform = transform
         self.tolerance = tolerance
@@ -26,23 +26,29 @@ class GenerateDataset(Dataset):
 
     def __getitem__(self, idx):
         # Generate random coefficients
-        a1, a2 = np.random.uniform(1, 5, 2)
-        a3, a4, a5 = np.random.uniform(-1, 1, 3)
 
         x = np.linspace(-10, 10, 100)
-
-        y_linear = a1 * x + a2
-        y_parabolic = a3 * x**2 + a4 * x + a5
 
         # Create figure
         fig, ax = plt.subplots(figsize=self.fig_size)
         ax.set_xlim(-10, 10)
         ax.set_ylim(-10, 10)
-        # np.random.rand(3,)
-        line_color = [0.0, 0.0, 1.0]
-        ax.plot(x, y_linear, color=line_color)
-        parab_color = [0.0, 1.0, 0.0]
-        ax.plot(x, y_parabolic, color=parab_color)
+        # Define colors
+        axes_color = [0.0, 0.0, 0.0]  # Black (assuming this is the color of the axes)
+        choice = np.random.choice([0, 1])
+        if choice == 0:
+            # linear
+            line_color = [0.0, 0.0, 1.0]
+            a1, a2 = np.random.uniform(-5, 5, 2)
+            y_linear = a1 * x + a2
+            ax.plot(x, y_linear, color=line_color)
+        else:
+            # parabolic
+            parab_color = [0.0, 0.0, 1.0]
+            a3, a4, a5 = np.random.uniform(-5, 5, 3)
+            y_parabolic = a3 * x**2 + a4 * x + a5
+            ax.plot(x, y_parabolic, color=parab_color)
+
         ax.spines['top'].set_visible(False)
         ax.spines['right'].set_visible(False)
 
@@ -53,16 +59,29 @@ class GenerateDataset(Dataset):
         # Convert RGBA to RGB
         image = image[:, :, :3]
 
-        # Create mask
-        mask = np.zeros(image.shape[:2], dtype=np.uint8)
-        mask[image[:, :, 0] == 0] = 1
-        mask[self.within_tolerance(image, line_color, self.tolerance)] = 2
-        mask[self.within_tolerance(image, parab_color, self.tolerance)] = 3
+        # Create masks
+        axes_mask = np.zeros(image.shape[:2], dtype=np.uint8)
+        plot_mask = np.zeros(image.shape[:2], dtype=np.uint8)
 
+        # Mask axes
+        axes_mask[self.within_tolerance(image, axes_color, self.tolerance)] = 1
+
+        # Mask lines
+        if choice == 0:
+            plot_mask[self.within_tolerance(image, line_color, self.tolerance)] = 1
+        else:
+            plot_mask[self.within_tolerance(image, parab_color, self.tolerance)] = 1
+
+        # Combine masks into a two-channel mask
+        mask = np.stack((axes_mask, plot_mask), axis=0)
+
+        # Convert to torch tensors
         image = torch.from_numpy(image).permute(2, 0, 1).float() / 255.0
         mask = torch.from_numpy(mask).long()
+
+        # Resize images and masks
         image = F.interpolate(image.unsqueeze(0), size=self.img_size, mode='bilinear', align_corners=False).squeeze(0)
-        mask = F.interpolate(mask.unsqueeze(0).unsqueeze(0).float(), size=self.img_size, mode='nearest').squeeze(0).squeeze(0).long()
+        mask = F.interpolate(mask.unsqueeze(0).float(), size=self.img_size, mode='nearest').squeeze(0).long()
 
         return image, mask
 
@@ -121,31 +140,31 @@ if __name__ == "__main__":
     generate_data(mode="test", num_samples=128, img_size=img_size, fig_size=2)
     generate_data(mode="validation", num_samples=128, img_size=img_size, fig_size=2)
 
-    dataloader = create_dataloader(img_size=512)
+    # dataloader = create_dataloader(img_size=512)
 
-    for images, masks in dataloader:
-        print(images.shape, masks.shape)
-        break
+    # for images, masks in dataloader:
+    #     print(images.shape, masks.shape)
+    #     break
 
-    print("Individual image size: ", images.shape, images.max(), images.min())
-    print("Corresponding mask size: ", masks.shape, masks.max(), masks.min())
+    # print("Individual image size: ", images.shape, images.max(), images.min())
+    # print("Corresponding mask size: ", masks.shape, masks.max(), masks.min())
 
-    n = 2
-    fig, axes = plt.subplots(4, n, figsize=(9, 5))
-    axes = axes.ravel()
-    for i in range(n):
-        axes[i].imshow(images[i].permute(1, 2, 0))
-        axes[i].axis("off")
-        axes[i + n].imshow(255 * masks[i])
-        axes[i + n].axis("off")
-        axes[i + n].set_title(f"{np.unique(masks[i])}")
+    # n = 2
+    # fig, axes = plt.subplots(4, n, figsize=(9, 5))
+    # axes = axes.ravel()
+    # for i in range(n):
+    #     axes[i].imshow(images[i].permute(1, 2, 0))
+    #     axes[i].axis("off")
+    #     axes[i + n].imshow(255 * masks[i])
+    #     axes[i + n].axis("off")
+    #     axes[i + n].set_title(f"{np.unique(masks[i])}")
 
-    for i in range(n):
-        axes[i + 2 * n].imshow(images[i + 6].permute(1, 2, 0))
-        axes[i + 2 * n].axis("off")
-        axes[i + 3 * n].imshow(255 * masks[i + 6])
-        axes[i + 3 * n].axis("off")
-        axes[i + 3 * n].set_title(f"{np.unique(masks[i + 6])}")
+    # for i in range(n):
+    #     axes[i + 2 * n].imshow(images[i + 6].permute(1, 2, 0))
+    #     axes[i + 2 * n].axis("off")
+    #     axes[i + 3 * n].imshow(255 * masks[i + 6])
+    #     axes[i + 3 * n].axis("off")
+    #     axes[i + 3 * n].set_title(f"{np.unique(masks[i + 6])}")
 
-    plt.tight_layout()
-    plt.savefig("generated_example.png")
+    # plt.tight_layout()
+    # plt.savefig("generated_example.png")

@@ -3,16 +3,27 @@ from torch import nn
 
 
 class DiceLoss(nn.Module):
-    def __init__(self, smooth=1):
+    def __init__(self, smooth=1e-3):
         super(DiceLoss, self).__init__()
         self.smooth = smooth
 
     def forward(self, logits, targets):
-        logit_sum = torch.squeeze(logits, dim=1)
-        intersection = (logit_sum * targets).sum(dim=(1, 2))
-        union = logit_sum.sum(dim=(1, 2)) + targets.sum(dim=(1, 2))
-        dice = (2. * intersection + 1e-3) / (union + 1e-3)
-        return 1 - dice.mean()
+        assert logits.shape == targets.shape, "Logits and targets must have the same shape"
+
+        num_classes = logits.shape[1]
+        dice_loss = 0.0
+
+        for c in range(num_classes):
+            logit = logits[:, c, :, :]
+            target = targets[:, c, :, :].float()
+            logit = torch.sigmoid(logit)
+
+            intersection = (logit * target).sum(dim=(1, 2))
+            union = logit.sum(dim=(1, 2)) + target.sum(dim=(1, 2))
+            dice = (2. * intersection + self.smooth) / (union + self.smooth)
+            dice_loss += 1 - dice.mean()
+
+        return dice_loss / num_classes
 
 
 class CombinedLoss(nn.Module):

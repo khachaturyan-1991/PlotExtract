@@ -3,7 +3,7 @@ from utils import plot_hystory, parse_arguments, count_torch_parameters, read_ru
 from models_zoo.unet import UNet
 from data.data import create_dataloader
 from train.train import Trainer
-from metrics.losses import DiceLoss
+from metrics.losses import CombinedLoss
 from torchinfo import summary
 import pandas as pd
 import datetime
@@ -61,7 +61,7 @@ if __name__ == "__main__":
                              lr=LR)
 
     model_train = Trainer(model=model,
-                          loss_fn=DiceLoss(),
+                          loss_fn=CombinedLoss(),
                           optimizer=optim,
                           device=DEVICE,
                           **mlflow_input)

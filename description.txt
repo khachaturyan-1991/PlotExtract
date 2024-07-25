@@ -1,1 +1,1 @@
-Now trying Combined loss of cross entropy and Tversky. This way I can see effect of Tversky
+OK; now I remove cross entropy to see how it works with only Dice

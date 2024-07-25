@@ -53,9 +53,10 @@ class FocalLoss(nn.Module):
         super(FocalLoss, self).__init__()
         self.alpha = alpha
         self.gamma = gamma
+        self.cross_entropy_loss = nn.CrossEntropyLoss()
 
     def forward(self, logits, targets):
-        ce_loss = F.cross_entropy(logits, targets.argmax(dim=1), reduction='none')
+        ce_loss = self.cross_entropy_loss(logits, targets.argmax(dim=1), reduction='none')
         pt = torch.exp(-ce_loss)
         focal_loss = self.alpha * (1 - pt) ** self.gamma * ce_loss
         return focal_loss.mean()
@@ -64,7 +65,7 @@ class FocalLoss(nn.Module):
 class CombinedLoss(nn.Module):
     def __init__(self, dice_weight=0.9):
         super(CombinedLoss, self).__init__()
-        self.dice_loss = TverskyLoss()  # DiceLoss()
+        self.dice_loss = DiceLoss()  # TverskyLoss()  #
         self.cross_entropy_loss = nn.CrossEntropyLoss()
         self.dice_weight = dice_weight
 

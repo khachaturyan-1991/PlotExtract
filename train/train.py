@@ -13,6 +13,7 @@ class Trainer:
     def __init__(self,
                  model: nn.Module,
                  loss_fn: nn.Module,
+                 accuracy_fn: nn.Module,
                  optimizer: torch.optim,
                  device: str = "cpu:0",
                  **kwargs
@@ -20,6 +21,7 @@ class Trainer:
         self.model = model
         self.device = device
         self.loss_fn = loss_fn
+        self.accuracy_fn = accuracy_fn
         self.optimizer = optimizer
         self.mlf = kwargs
         mlflow.set_tracking_uri("./mlruns")
@@ -58,6 +60,7 @@ class Trainer:
                          ):
         self.model.eval()
         step_loss = 0
+        step_accuracy = 0
         n = 0
         for X, masks in dataloader:
             X = X.type(torch.float32)
@@ -66,9 +69,11 @@ class Trainer:
             masks = masks.to(self.device)
             pred = self.model(X)
             loss = self.loss_fn(pred, masks)
+            accuracy = self.accuracy_fn(pred, masks)
+            step_accuracy += accuracy.item()
             step_loss += loss.item()
             n += 1
-        return step_loss / n
+        return step_loss / n, step_accuracy / n
 
     def test_step(self,
                   dataloader: torch.utils.data.DataLoader,
@@ -122,18 +127,19 @@ class Trainer:
             mlflow.log_param("device", self.device)
             for epoch in tqdm.tqdm(range(epochs)):
                 train_loss = self.train_step(train_dataloder)
-                validation_loss = self.validationt_step(validation_dataloder)
+                val_loss, val_acc = self.validationt_step(validation_dataloder)
                 avg_train_loss[first_step + epoch] = train_loss
-                avg_val_loss[first_step + epoch] = validation_loss
+                avg_val_loss[first_step + epoch] = val_loss
                 if (epoch + 1) % 100 == 0:
                     saved_under = "./intermediate.pth"
                     torch.save(self.model.state_dict(), saved_under)
                     mlflow.log_artifact(saved_under)
                 if epoch % output_freq == 0:
                     print(f"Epoch {epoch + 1 + first_step}/{first_step + last_step}, \
-                    Train loss: {train_loss:.4f} Validation loss: {validation_loss:.4f}")
+                    Train loss: {train_loss:.4f} Validation loss: {val_loss:.4f} accuracy: {val_acc:.4f}")
                     mlflow.log_metric("train_loss", train_loss, step=epoch)
-                    mlflow.log_metric("validation_loss", validation_loss, step=epoch)
+                    mlflow.log_metric("validation_loss", val_loss, step=epoch)
+                    mlflow.log_metric("validation_accuracy", val_acc, step=epoch)
                 # mlflow.pytorch.log_model(self.model, "model")
         self.test_step(test_dataloder)
         saved_under = f"./{self.mlf['run_name']}.pth"

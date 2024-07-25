@@ -1,6 +1,5 @@
 import torch
 from torch import nn
-import torch.functional as F
 
 
 class DiceLoss(nn.Module):

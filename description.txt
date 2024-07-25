@@ -1,1 +1,2 @@
-OK; now I remove cross entropy to see how it works with only Dice
+Now when I believe Tersely is the best, I will train a bit longer to see if segmentation can be still improved;
+Besides for the first time accuracy is implemented

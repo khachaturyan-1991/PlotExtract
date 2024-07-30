@@ -71,7 +71,7 @@ class Trainer:
             masks = masks.to(self.device)
             pred = self.model(X)
             segment_loss = self.segment_loss(pred, masks)
-            numeric_loss = self.numeric_loss(pred, masks)
+            numeric_loss = self.numeric_loss(pred, masks.float())
             step_loss += segment_loss.item()
             step_accuracy += numeric_loss.item()
             n += 1

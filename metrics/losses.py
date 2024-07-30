@@ -1,6 +1,5 @@
 import torch
 from torch import nn
-import torch.nn.functional as F
 
 
 class DiceLoss(nn.Module):
@@ -48,21 +47,21 @@ class TverskyLoss(nn.Module):
             tversky_loss += 1 - tversky.mean()
         return tversky_loss / num_classes
 
-import numpy as np
+
 class CombinedLoss(nn.Module):
 
     def __init__(self, dice_weight=0.1):
         super(CombinedLoss, self).__init__()
-        self.dice_loss = DiceLoss()  # TverskyLoss()  #
-        self.cross_entropy_loss = nn.CrossEntropyLoss()
+        self.dice_loss = TverskyLoss()
+        self.BCE_loss = nn.BCEWithLogitsLoss()
         self.dice_weight = dice_weight
 
     def forward(self, logits, targets):
         dice_loss_value = self.dice_loss(logits, targets)
         # let crossentropy care only abot plots
-        cross_entropy_loss_1 = self.cross_entropy_loss(logits[:, 0, :, :], targets[:, 0, :, :].squeeze(1))
-        cross_entropy_loss_2 = self.cross_entropy_loss(logits[:, 1, :, :], targets[:, 1, :, :].squeeze(1))
-        cross_entropy_loss_value = 0.5 * (cross_entropy_loss_1 + cross_entropy_loss_2)
+        BSE_loss_1 = self.BCE_loss(logits[:, 0, :, :], targets[:, 0, :, :].float())
+        BSE_loss_2 = self.BCE_loss(logits[:, 1, :, :], targets[:, 1, :, :].float())
+        cross_entropy_loss_value = 0.5 * (BSE_loss_1 + BSE_loss_2)
         return self.dice_weight * dice_loss_value + (1 - self.dice_weight) * cross_entropy_loss_value
 
 

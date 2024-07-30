@@ -62,7 +62,7 @@ if __name__ == "__main__":
     model_train = Trainer(model=model,
                           loss_fn=CombinedLoss(dice_weight=DICE_COEF),
                           segment_loss=DiceLoss(),
-                          numeric_loss=torch.nn.CrossEntropyLoss(),
+                          numeric_loss=torch.nn.BCELoss(),
                           optimizer=optim,
                           device=DEVICE,
                           **mlflow_input)

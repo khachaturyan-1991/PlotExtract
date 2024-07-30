@@ -25,26 +25,19 @@ class GenerateDataset(Dataset):
         return np.all(np.abs(img - np.array(color) * 255) <= tol, axis=-1)
 
     def __getitem__(self, idx):
-        # Generate random coefficients
 
         x = np.linspace(-2, 2, 100)
 
-        # Create figure
         fig, ax = plt.subplots(figsize=self.fig_size)
         ax.set_xlim(-2, 2)
         ax.set_ylim(-10, 10)
-        # Define colors
+
         axes_color = [0.0, 0.0, 0.0]
 
         coef = np.random.uniform(-8, 8, 3)
         y = np.poly1d(coef)
-        line_color_1 = [0, 0, 1]
-        ax.plot(x, y(x), color=line_color_1)
-
-        coef = np.random.uniform(0, 8, 3)
-        y = np.poly1d(coef)
-        line_color_2 = [0, 1, 0]
-        ax.plot(x, y(x), color=line_color_2)
+        line_color = [0, 0, 1]
+        ax.plot(x, y(x), color=line_color)
 
         ax.spines['top'].set_visible(False)
         ax.spines['right'].set_visible(False)
@@ -53,30 +46,23 @@ class GenerateDataset(Dataset):
         image = np.array(fig.canvas.renderer.buffer_rgba())
         plt.close(fig)
 
-        # Create masks
         image = image[:, :, :3]
 
         axes_mask = np.zeros(image.shape[:2], dtype=np.uint8)
         plot_mask = np.zeros(image.shape[:2], dtype=np.uint8)
 
-        # Mask axes
         axes_mask[self.within_tolerance(image, axes_color, self.tolerance)] = 1
-        # Mask lines
-        plot_mask[self.within_tolerance(image, line_color_1, self.tolerance)] = 1
-        plot_mask[self.within_tolerance(image, line_color_2, self.tolerance)] = 2
+        plot_mask[self.within_tolerance(image, line_color, self.tolerance)] = 1
 
-        # Combine masks into a two-channel mask
         mask = np.stack((axes_mask, plot_mask), axis=0)
 
-        # Convert to torch tensors
         image = torch.from_numpy(image).permute(2, 0, 1).float() / 255.0
         mask = torch.from_numpy(mask).long()
 
-        # Resize images and masks
         image = F.interpolate(image.unsqueeze(0), size=self.img_size, mode='bilinear', align_corners=False).squeeze(0)
         mask = F.interpolate(mask.unsqueeze(0).float(), size=self.img_size, mode='nearest').squeeze(0).long()
 
-        return image, mask
+        return image, mask, coef
 
 
 def generate_data(mode: str = "train", num_samples: int = 1000, img_size: int = 128, fig_size: int = 5):
@@ -86,14 +72,17 @@ def generate_data(mode: str = "train", num_samples: int = 1000, img_size: int = 
         os.mkdir(f"./{mode}/image")
         os.mkdir(f"./{mode}/mask")
     dataset = GenerateDataset(num_samples=num_samples, img_size=img_size, fig_size=fig_size)
+    coefs = np.zeros((num_samples, 3))
     i = 0
-    for img, mask in dataset:
+    for img, mask, coef in dataset:
         np.save(f'./{mode}/image/{i}.npy', img)
         np.save(f'./{mode}/mask/{i}.npy', mask)
+        coefs[i] = coef
         i += 1
         if i == num_samples:
             break
     print(f"{i} images were saved to {mode}")
+    np.save(f'./{mode}/coefs.npy', coefs)
 
 
 class LoadDataset(Dataset):
@@ -101,10 +90,16 @@ class LoadDataset(Dataset):
         super(Dataset, self).__init__()
         self.transform = transform
         self.img_size = (img_size, img_size)
-        self.image_paths = glob.glob(f"./data/{mode}/image/*.npy")[:num_samples]
+        image_paths = glob.glob(f"./data/{mode}/image/*.npy")[:num_samples]
+        self.image_paths = sorted(image_paths, key=self.extract_number)
 
     def __len__(self):
         return len(self.image_paths)
+
+    def extract_number(self, filename):
+        base = os.path.basename(filename)
+        number = os.path.splitext(base)[0]
+        return int(number)
 
     def __getitem__(self, idx):
         img_path = self.image_paths[idx]

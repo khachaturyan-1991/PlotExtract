@@ -78,8 +78,9 @@ class UpperBlock(nn.Module):
 
 class UNet(nn.Module):
 
-    def __init__(self, depth: int = MODEL_DEPTH, **kwargs):
+    def __init__(self, num_of_classes: int = 2, depth: int = MODEL_DEPTH, **kwargs):
         super(UNet, self).__init__(**kwargs)
+        self.noc = num_of_classes
         self.depth = depth
         # encoder
         self.down_blocks = nn.ModuleDict()
@@ -95,6 +96,7 @@ class UNet(nn.Module):
             self.up_block[str(depth - i)] = UpperBlock(2 * n_feat, n_feat)
             n_feat //= 2
         self.up_block[str(0)] = UpperBlock(64, 2)
+        self.sigmoid = nn.Sigmoid()
 
     def forward(self, x):
         x = self.down_blocks[str(0)](x)
@@ -103,7 +105,8 @@ class UNet(nn.Module):
         for i in range(1, self.depth):
             x = self.up_block[str(self.depth - i)](x)
         x = self.up_block[str(0)](x)
-        x = F.sigmoid(x)
+        x[:, 0, :, :] = self.sigmoid(x[:, 0, :, :])
+        x[:, 1, :, :] = self.sigmoid(x[:, 1, :, :]) * self.noc
         return x
 
 

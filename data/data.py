@@ -27,27 +27,24 @@ class GenerateDataset(Dataset):
     def __getitem__(self, idx):
         # Generate random coefficients
 
-        x = np.linspace(-10, 10, 100)
+        x = np.linspace(-2, 2, 100)
 
         # Create figure
         fig, ax = plt.subplots(figsize=self.fig_size)
-        ax.set_xlim(-10, 10)
+        ax.set_xlim(-2, 2)
         ax.set_ylim(-10, 10)
         # Define colors
-        axes_color = [0.0, 0.0, 0.0]  # Black (assuming this is the color of the axes)
-        choice = np.random.choice([0, 1])
-        if choice == 0:
-            # linear
-            line_color = [0.0, 0.0, 1.0]
-            a1, a2 = np.random.uniform(-5, 5, 2)
-            y_linear = a1 * x + a2
-            ax.plot(x, y_linear, color=line_color)
-        else:
-            # parabolic
-            parab_color = [0.0, 0.0, 1.0]
-            a3, a4, a5 = np.random.uniform(-5, 5, 3)
-            y_parabolic = a3 * x**2 + a4 * x + a5
-            ax.plot(x, y_parabolic, color=parab_color)
+        axes_color = [0.0, 0.0, 0.0]
+
+        coef = np.random.uniform(-8, 8, 3)
+        y = np.poly1d(coef)
+        line_color_1 = [0, 0, 1]
+        ax.plot(x, y(x), color=line_color_1)
+
+        coef = np.random.uniform(0, 8, 3)
+        y = np.poly1d(coef)
+        line_color_2 = [0, 1, 0]
+        ax.plot(x, y(x), color=line_color_2)
 
         ax.spines['top'].set_visible(False)
         ax.spines['right'].set_visible(False)
@@ -56,21 +53,17 @@ class GenerateDataset(Dataset):
         image = np.array(fig.canvas.renderer.buffer_rgba())
         plt.close(fig)
 
-        # Convert RGBA to RGB
+        # Create masks
         image = image[:, :, :3]
 
-        # Create masks
         axes_mask = np.zeros(image.shape[:2], dtype=np.uint8)
         plot_mask = np.zeros(image.shape[:2], dtype=np.uint8)
 
         # Mask axes
         axes_mask[self.within_tolerance(image, axes_color, self.tolerance)] = 1
-
         # Mask lines
-        if choice == 0:
-            plot_mask[self.within_tolerance(image, line_color, self.tolerance)] = 1
-        else:
-            plot_mask[self.within_tolerance(image, parab_color, self.tolerance)] = 1
+        plot_mask[self.within_tolerance(image, line_color_1, self.tolerance)] = 1
+        plot_mask[self.within_tolerance(image, line_color_2, self.tolerance)] = 2
 
         # Combine masks into a two-channel mask
         mask = np.stack((axes_mask, plot_mask), axis=0)
@@ -100,7 +93,7 @@ def generate_data(mode: str = "train", num_samples: int = 1000, img_size: int = 
         i += 1
         if i == num_samples:
             break
-    print(f"{i + 1} images were saved to {mode}")
+    print(f"{i} images were saved to {mode}")
 
 
 class LoadDataset(Dataset):
@@ -118,7 +111,7 @@ class LoadDataset(Dataset):
         image = np.load(img_path)
         mask_path = img_path.replace("image", "mask")
         mask = np.load(mask_path)
-        _, image = cv2.threshold(image, 0.7, 1, cv2.THRESH_BINARY)
+        _, image = cv2.threshold(image, 0.9, 1, cv2.THRESH_BINARY)
         return image, mask
 
 
@@ -136,7 +129,7 @@ def create_dataloader(num_samples: int = 32,
 if __name__ == "__main__":
 
     img_size = 128
-    generate_data(mode="train", num_samples=1280, img_size=img_size, fig_size=2)
+    generate_data(mode="train", num_samples=2560, img_size=img_size, fig_size=2)
     generate_data(mode="test", num_samples=128, img_size=img_size, fig_size=2)
     generate_data(mode="validation", num_samples=128, img_size=img_size, fig_size=2)
 

@@ -1,2 +1,24 @@
-Now when I believe Tersely is the best, I will train a bit longer to see if segmentation can be still improved;
-Besides for the first time accuracy is implemented
+Probably using pre-trained model (the one without Sigmoid) did not work well as number were big and Sigmoid of this number resulted into values 1*2. This is why all the plots are segmented as 2 - as in the pre-trained model there were way higher than 1.
+
+Besides that the overall loss was > 9. If that is repeated then the reason is that the separation of axes and plots was bad idea in a context of cross-entropy.
+
+Restarting the same but with now loading model.
+
+---
+Result was: decent segmetantiton, but again not pixel-wise
+-----
+
+Now applying softmax before computing cross-entropy
+
+--
+Result
+Became even worse, as in PyTorch Softmax is anyway being applied inside the loss function
+----
+
+Now will change target shape to 32, 128, 128 for the cross entropy before computing crossentorpy.
+But yet crossentropy is computed separetly for axes and plots
+
+---
+Result
+Only axes and plotsegementation happens, cross-entropy does not separate plots
+---

@@ -1,8 +1,10 @@
 import torch
 from torch import nn
+import torch.nn.functional as F
 
 
 class DiceLoss(nn.Module):
+
     def __init__(self, smooth=1e-3):
         super(DiceLoss, self).__init__()
         self.smooth = smooth
@@ -46,23 +48,10 @@ class TverskyLoss(nn.Module):
             tversky_loss += 1 - tversky.mean()
         return tversky_loss / num_classes
 
-
-class FocalLoss(nn.Module):
-    def __init__(self, alpha=1, gamma=2):
-        super(FocalLoss, self).__init__()
-        self.alpha = alpha
-        self.gamma = gamma
-        self.cross_entropy_loss = nn.CrossEntropyLoss()
-
-    def forward(self, logits, targets):
-        ce_loss = self.cross_entropy_loss(logits, targets.argmax(dim=1), reduction='none')
-        pt = torch.exp(-ce_loss)
-        focal_loss = self.alpha * (1 - pt) ** self.gamma * ce_loss
-        return focal_loss.mean()
-
-
+import numpy as np
 class CombinedLoss(nn.Module):
-    def __init__(self, dice_weight=0.9):
+
+    def __init__(self, dice_weight=0.1):
         super(CombinedLoss, self).__init__()
         self.dice_loss = DiceLoss()  # TverskyLoss()  #
         self.cross_entropy_loss = nn.CrossEntropyLoss()
@@ -70,17 +59,18 @@ class CombinedLoss(nn.Module):
 
     def forward(self, logits, targets):
         dice_loss_value = self.dice_loss(logits, targets)
-        logits = torch.squeeze(logits, dim=1)
-        targets = targets.float()
-        cross_entropy_loss_value = self.cross_entropy_loss(logits, targets)
+        # let crossentropy care only abot plots
+        cross_entropy_loss_1 = self.cross_entropy_loss(logits[:, 0, :, :], targets[:, 0, :, :].squeeze(1))
+        cross_entropy_loss_2 = self.cross_entropy_loss(logits[:, 1, :, :], targets[:, 1, :, :].squeeze(1))
+        cross_entropy_loss_value = 0.5 * (cross_entropy_loss_1 + cross_entropy_loss_2)
         return self.dice_weight * dice_loss_value + (1 - self.dice_weight) * cross_entropy_loss_value
 
 
 if __name__ == "__main__":
 
-    num_classes = 1
-    output = torch.randn(32, num_classes, 128, 128)
-    mask = torch.randint(0, num_classes, (32, 128, 128))
+    num_classes = 2
+    output = torch.randn([32, num_classes, 128, 128])
+    mask = torch.randn([32, num_classes, 128, 128])
 
     combined_loss = CombinedLoss()
     loss = combined_loss(output, mask)

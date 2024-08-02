@@ -37,8 +37,8 @@ class DownBlock(nn.Module):
         x = self.conv_2(x)
         x = self.batch_2(x)
         x = self.relu(x)
-        x = self.maxpool(x)
-        return x
+        pool = self.maxpool(x)
+        return x, pool
 
 
 class UpperBlock(nn.Module):
@@ -97,11 +97,12 @@ class UNet(nn.Module):
         self.up_block[str(0)] = UpperBlock(64, 2)
 
     def forward(self, x):
-        x = self.down_blocks[str(0)](x)
+        skips = []
+        for i in range(self.depth):
+            skip, x = self.down_blocks[str(i)](x)
+            skips.append(skip)
         for i in range(1, self.depth):
-            x = self.down_blocks[str(i)](x)
-        for i in range(1, self.depth):
-            x = self.up_block[str(self.depth - i)](x)
+            x = self.up_block[str(self.depth - i)](x, skips[self.depth - i - 1])
         x = self.up_block[str(0)](x)
         x = F.sigmoid(x)
         return x

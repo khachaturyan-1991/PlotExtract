@@ -79,6 +79,7 @@ class Trainer:
 
     def test_step(self,
                   dataloader: torch.utils.data.DataLoader,
+                  epoch: int
                   ):
         self.model.eval()
         step_loss = 0
@@ -110,7 +111,7 @@ class Trainer:
             axes[i + 12].imshow(masks[i][1, :, :])
             axes[i + 12].axis("off")
         plt.tight_layout()
-        plt.savefig("test_res.png")
+        plt.savefig(f"./res_imgs/{epoch}.png")
 
     def fit(self,
             train_dataloder: torch.utils.data.DataLoader,
@@ -132,18 +133,22 @@ class Trainer:
                 seg_loss, num_loss = self.validationt_step(validation_dataloder)
                 avg_train_loss[first_step + epoch] = train_loss
                 avg_seg_loss[first_step + epoch] = seg_loss
+                if epoch == 1:
+                    mlflow.log_artifact("./metrics/losses.py")
+                    mlflow.log_artifact("./data/data.py")
+                    mlflow.log_artifact("./models_zoo/unet.py")
                 if (epoch + 1) % 20 == 0:
                     saved_under = "./intermediate.pth"
                     torch.save(self.model.state_dict(), saved_under)
                     mlflow.log_artifact(saved_under)
-                    self.test_step(test_dataloder)
+                if (epoch + 1) % 5 == 0:
+                    self.test_step(test_dataloder, epoch)
                 if epoch % output_freq == 0:
                     print(f"Epoch {epoch + 1 + first_step}/{first_step + last_step}, \
-                    Train loss: {train_loss:.4f} Segmentation loss: {seg_loss:.4f} Colour: {num_loss:.4f}")
+                    Train loss: {train_loss:.5f} Dice: {seg_loss:.5f} MSE: {num_loss:.5f}")
                     mlflow.log_metric("train_loss", train_loss, step=epoch)
-                    mlflow.log_metric("val_Dice", seg_loss, step=epoch)
-                    mlflow.log_metric("val_Entro", num_loss, step=epoch)
-                # mlflow.pytorch.log_model(self.model, "model")
+                    mlflow.log_metric("Dice", seg_loss, step=epoch)
+                    mlflow.log_metric("MSE", num_loss, step=epoch)
         saved_under = f"./{self.mlf['run_name']}.pth"
         torch.save(self.model.state_dict(), saved_under)
         mlflow.log_artifact(saved_under)

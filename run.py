@@ -3,7 +3,7 @@ from utils import parse_arguments, count_torch_parameters, read_run_description,
 from models_zoo.unet import UNet
 from data.data import create_dataloader
 from train.train import Trainer
-from metrics.losses import DiceLoss, CombinedLoss
+from metrics.losses import DiceLoss, SMSE, CombinedLoss
 from torchinfo import summary
 import datetime
 import matplotlib
@@ -27,7 +27,7 @@ if __name__ == "__main__":
     DICE_COEF = args.dice_coef
 
     time_stamp = datetime.datetime.now()
-    run_name = time_stamp.strftime("%H-%M-%d-%m-%Y")
+    run_name = time_stamp.strftime("%m-%d-%H-%M")
     if RUN_DESCRIPTION:
         run_description = read_run_description()
     else:
@@ -62,7 +62,7 @@ if __name__ == "__main__":
     model_train = Trainer(model=model,
                           loss_fn=CombinedLoss(dice_weight=DICE_COEF),
                           segment_loss=DiceLoss(),
-                          numeric_loss=torch.nn.BCELoss(),
+                          numeric_loss=SMSE(),
                           optimizer=optim,
                           device=DEVICE,
                           **mlflow_input)

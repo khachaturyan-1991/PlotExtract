@@ -2,31 +2,6 @@ import torch
 from torch import nn
 
 
-class DiceLoss(nn.Module):
-
-    def __init__(self, smooth=1e-3):
-        super(DiceLoss, self).__init__()
-        self.smooth = smooth
-
-    def forward(self, logits, targets):
-        assert logits.shape == targets.shape, "Logits and targets must have the same shape"
-
-        num_classes = logits.shape[1]
-        dice_loss = 0.0
-
-        for c in range(num_classes):
-            logit = logits[:, c, :, :]
-            target = targets[:, c, :, :].float()
-            logit = torch.sigmoid(logit)
-
-            intersection = (logit * target).sum(dim=(1, 2))
-            union = logit.sum(dim=(1, 2)) + target.sum(dim=(1, 2))
-            dice = (2. * intersection + self.smooth) / (union + self.smooth)
-            dice_loss += 1 - dice.mean()
-
-        return dice_loss / num_classes
-
-
 class TverskyLoss(nn.Module):
     def __init__(self, alpha=0.5, beta=0.5, smooth=1):
         super(TverskyLoss, self).__init__()
@@ -48,21 +23,65 @@ class TverskyLoss(nn.Module):
         return tversky_loss / num_classes
 
 
+class DiceLoss(nn.Module):
+
+    def __init__(self, smooth=1e-3):
+        super(DiceLoss, self).__init__()
+        self.smooth = smooth
+
+    def forward(self, logits, targets):
+        assert logits.shape == targets.shape, "Logits and targets must have the same shape"
+
+        num_classes = logits.shape[1]
+        dice_loss = 0.0
+        for c in range(num_classes):
+            logit = logits[:, c, :, :]
+            target = targets[:, c, :, :].float()
+            logit = torch.sigmoid(logit)
+
+            intersection = (logit * target).sum(dim=(1, 2))
+            union = logit.sum(dim=(1, 2)) + target.sum(dim=(1, 2))
+            dice = (2. * intersection + self.smooth) / (union + self.smooth)
+            dice_loss += 1 - dice.mean()
+
+        return dice_loss / num_classes
+
+
+class SMSE(nn.Module):
+
+    def __init__(self):
+        super(SMSE, self).__init__()
+        self.mse = nn.MSELoss()
+
+    def forward(self, logits, targets):
+        mse_loss = 0
+        num_classes = logits.shape[1]
+        batch_size = logits.shape[0]
+        for batch in range(batch_size):
+            for channel in range(num_classes):
+                targets_ch = targets[batch, channel, :, :]
+                logits_ch = logits[batch, channel, :, :]
+                mask_pos = targets_ch > 0
+                if torch.any(mask_pos):
+                    mse_loss += self.mse(logits_ch[mask_pos], targets_ch[mask_pos])
+                mask_neg = targets_ch == 0
+                if torch.any(mask_neg):
+                    mse_loss += self.mse(logits_ch[mask_neg], targets_ch[mask_neg])
+        return mse_loss / num_classes / batch_size
+
+
 class CombinedLoss(nn.Module):
 
-    def __init__(self, dice_weight=0.1):
+    def __init__(self, dice_weight=0.8):
         super(CombinedLoss, self).__init__()
-        self.dice_loss = TverskyLoss()
-        self.BCE_loss = nn.BCEWithLogitsLoss()
+        self.dice_loss = DiceLoss()
+        self.mse = SMSE()
         self.dice_weight = dice_weight
 
     def forward(self, logits, targets):
         dice_loss_value = self.dice_loss(logits, targets)
-        # let crossentropy care only abot plots
-        BSE_loss_1 = self.BCE_loss(logits[:, 0, :, :], targets[:, 0, :, :].float())
-        BSE_loss_2 = self.BCE_loss(logits[:, 1, :, :], targets[:, 1, :, :].float())
-        cross_entropy_loss_value = 0.5 * (BSE_loss_1 + BSE_loss_2)
-        return self.dice_weight * dice_loss_value + (1 - self.dice_weight) * cross_entropy_loss_value
+        mse_loss = self.mse(logits, targets)
+        return self.dice_weight * dice_loss_value + (1 - self.dice_weight) * mse_loss
 
 
 if __name__ == "__main__":

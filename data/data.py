@@ -124,35 +124,6 @@ def create_dataloader(num_samples: int = 32,
 if __name__ == "__main__":
 
     img_size = 128
-    generate_data(mode="train", num_samples=2560, img_size=img_size, fig_size=2)
+    generate_data(mode="train", num_samples=1024, img_size=img_size, fig_size=2)
     generate_data(mode="test", num_samples=128, img_size=img_size, fig_size=2)
     generate_data(mode="validation", num_samples=128, img_size=img_size, fig_size=2)
-
-    # dataloader = create_dataloader(img_size=512)
-
-    # for images, masks in dataloader:
-    #     print(images.shape, masks.shape)
-    #     break
-
-    # print("Individual image size: ", images.shape, images.max(), images.min())
-    # print("Corresponding mask size: ", masks.shape, masks.max(), masks.min())
-
-    # n = 2
-    # fig, axes = plt.subplots(4, n, figsize=(9, 5))
-    # axes = axes.ravel()
-    # for i in range(n):
-    #     axes[i].imshow(images[i].permute(1, 2, 0))
-    #     axes[i].axis("off")
-    #     axes[i + n].imshow(255 * masks[i])
-    #     axes[i + n].axis("off")
-    #     axes[i + n].set_title(f"{np.unique(masks[i])}")
-
-    # for i in range(n):
-    #     axes[i + 2 * n].imshow(images[i + 6].permute(1, 2, 0))
-    #     axes[i + 2 * n].axis("off")
-    #     axes[i + 3 * n].imshow(255 * masks[i + 6])
-    #     axes[i + 3 * n].axis("off")
-    #     axes[i + 3 * n].set_title(f"{np.unique(masks[i + 6])}")
-
-    # plt.tight_layout()
-    # plt.savefig("generated_example.png")

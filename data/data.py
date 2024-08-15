@@ -36,8 +36,12 @@ class GenerateDataset(Dataset):
 
         coef = np.random.uniform(-8, 8, 3)
         y = np.poly1d(coef)
-        line_color = [0, 0, 1]
-        ax.plot(x, y(x), color=line_color)
+        line_color1 = [0, 0, 1]
+        ax.plot(x, y(x), color=line_color1)
+        coef = np.random.uniform(-8, 8, 3)
+        y = np.poly1d(coef)
+        line_color2 = [0, 1, 0]
+        ax.plot(x, y(x), color=line_color2)
 
         ax.spines['top'].set_visible(False)
         ax.spines['right'].set_visible(False)
@@ -52,7 +56,8 @@ class GenerateDataset(Dataset):
         plot_mask = np.zeros(image.shape[:2], dtype=np.uint8)
 
         axes_mask[self.within_tolerance(image, axes_color, self.tolerance)] = 1
-        plot_mask[self.within_tolerance(image, line_color, self.tolerance)] = 1
+        plot_mask[self.within_tolerance(image, line_color1, self.tolerance)] = 1
+        plot_mask[self.within_tolerance(image, line_color2, self.tolerance)] = 1
 
         mask = np.stack((axes_mask, plot_mask), axis=0)
 

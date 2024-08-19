@@ -1,11 +1,10 @@
 import torch
-from utils import plot_hystory, parse_arguments, count_torch_parameters, read_run_description, load_model
+from utils import parse_arguments, count_torch_parameters, read_run_description, load_model
 from models_zoo.unet import UNet
 from data.data import create_dataloader
 from train.train import Trainer
-from metrics.losses import TverskyLoss, DiceLoss
+from metrics.losses import DiceLoss, SMSE, CombinedLoss
 from torchinfo import summary
-import pandas as pd
 import datetime
 import matplotlib
 matplotlib.use('Agg')
@@ -28,7 +27,7 @@ if __name__ == "__main__":
     DICE_COEF = args.dice_coef
 
     time_stamp = datetime.datetime.now()
-    run_name = time_stamp.strftime("%H-%M-%d-%m-%Y")
+    run_name = time_stamp.strftime("%m-%d-%H-%M")
     if RUN_DESCRIPTION:
         run_description = read_run_description()
     else:
@@ -61,8 +60,9 @@ if __name__ == "__main__":
                              lr=LR)
 
     model_train = Trainer(model=model,
-                          loss_fn=TverskyLoss(),
-                          accuracy_fn=DiceLoss(),
+                          loss_fn=CombinedLoss(dice_weight=DICE_COEF),
+                          segment_loss=DiceLoss(),
+                          numeric_loss=SMSE(),
                           optimizer=optim,
                           device=DEVICE,
                           **mlflow_input)
@@ -75,11 +75,11 @@ if __name__ == "__main__":
                                       epochs=EPOCHS,
                                       first_step=FIRST_STEP)
 
-    plot_hystory(h_train,
-                 h_test,
-                 f"./history_plots/{DEPTH}_{IMG_SIZE}_{FIG_SIZE}")
+    # plot_hystory(h_train,
+    #              h_test,
+    #              f"./history_plots/{DEPTH}_{IMG_SIZE}_{FIG_SIZE}")
 
-    df = pd.DataFrame({"step": list(h_train.keys()),
-                       "train_loss": list(h_train.values()),
-                       "test_loss": list(h_test.values())})
-    df.to_csv(f"./csv/{DEPTH}_{IMG_SIZE}_{FIG_SIZE}.csv", index=False)
+    # df = pd.DataFrame({"step": list(h_train.keys()),
+    #                    "train_loss": list(h_train.values()),
+    #                    "test_loss": list(h_test.values())})
+    # df.to_csv(f"./csv/{DEPTH}_{IMG_SIZE}_{FIG_SIZE}.csv", index=False)

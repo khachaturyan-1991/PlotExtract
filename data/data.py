@@ -25,29 +25,23 @@ class GenerateDataset(Dataset):
         return np.all(np.abs(img - np.array(color) * 255) <= tol, axis=-1)
 
     def __getitem__(self, idx):
-        # Generate random coefficients
 
-        x = np.linspace(-10, 10, 100)
+        x = np.linspace(-2, 2, 100)
 
-        # Create figure
         fig, ax = plt.subplots(figsize=self.fig_size)
-        ax.set_xlim(-10, 10)
+        ax.set_xlim(-2, 2)
         ax.set_ylim(-10, 10)
-        # Define colors
-        axes_color = [0.0, 0.0, 0.0]  # Black (assuming this is the color of the axes)
-        choice = np.random.choice([0, 1])
-        if choice == 0:
-            # linear
-            line_color = [0.0, 0.0, 1.0]
-            a1, a2 = np.random.uniform(-5, 5, 2)
-            y_linear = a1 * x + a2
-            ax.plot(x, y_linear, color=line_color)
-        else:
-            # parabolic
-            parab_color = [0.0, 0.0, 1.0]
-            a3, a4, a5 = np.random.uniform(-5, 5, 3)
-            y_parabolic = a3 * x**2 + a4 * x + a5
-            ax.plot(x, y_parabolic, color=parab_color)
+
+        axes_color = [0.0, 0.0, 0.0]
+
+        coef = np.random.uniform(-8, 8, 3)
+        y = np.poly1d(coef)
+        line_color1 = [0, 0, 1]
+        ax.plot(x, y(x), color=line_color1)
+        coef = np.random.uniform(-8, 8, 3)
+        y = np.poly1d(coef)
+        line_color2 = [0, 1, 0]
+        ax.plot(x, y(x), color=line_color2)
 
         ax.spines['top'].set_visible(False)
         ax.spines['right'].set_visible(False)
@@ -56,34 +50,24 @@ class GenerateDataset(Dataset):
         image = np.array(fig.canvas.renderer.buffer_rgba())
         plt.close(fig)
 
-        # Convert RGBA to RGB
         image = image[:, :, :3]
 
-        # Create masks
         axes_mask = np.zeros(image.shape[:2], dtype=np.uint8)
         plot_mask = np.zeros(image.shape[:2], dtype=np.uint8)
 
-        # Mask axes
         axes_mask[self.within_tolerance(image, axes_color, self.tolerance)] = 1
+        plot_mask[self.within_tolerance(image, line_color1, self.tolerance)] = 1
+        plot_mask[self.within_tolerance(image, line_color2, self.tolerance)] = 1
 
-        # Mask lines
-        if choice == 0:
-            plot_mask[self.within_tolerance(image, line_color, self.tolerance)] = 1
-        else:
-            plot_mask[self.within_tolerance(image, parab_color, self.tolerance)] = 1
-
-        # Combine masks into a two-channel mask
         mask = np.stack((axes_mask, plot_mask), axis=0)
 
-        # Convert to torch tensors
         image = torch.from_numpy(image).permute(2, 0, 1).float() / 255.0
         mask = torch.from_numpy(mask).long()
 
-        # Resize images and masks
         image = F.interpolate(image.unsqueeze(0), size=self.img_size, mode='bilinear', align_corners=False).squeeze(0)
         mask = F.interpolate(mask.unsqueeze(0).float(), size=self.img_size, mode='nearest').squeeze(0).long()
 
-        return image, mask
+        return image, mask, coef
 
 
 def generate_data(mode: str = "train", num_samples: int = 1000, img_size: int = 128, fig_size: int = 5):
@@ -93,14 +77,17 @@ def generate_data(mode: str = "train", num_samples: int = 1000, img_size: int = 
         os.mkdir(f"./{mode}/image")
         os.mkdir(f"./{mode}/mask")
     dataset = GenerateDataset(num_samples=num_samples, img_size=img_size, fig_size=fig_size)
+    coefs = np.zeros((num_samples, 3))
     i = 0
-    for img, mask in dataset:
+    for img, mask, coef in dataset:
         np.save(f'./{mode}/image/{i}.npy', img)
         np.save(f'./{mode}/mask/{i}.npy', mask)
+        coefs[i] = coef
         i += 1
         if i == num_samples:
             break
-    print(f"{i + 1} images were saved to {mode}")
+    print(f"{i} images were saved to {mode}")
+    np.save(f'./{mode}/coefs.npy', coefs)
 
 
 class LoadDataset(Dataset):
@@ -108,17 +95,23 @@ class LoadDataset(Dataset):
         super(Dataset, self).__init__()
         self.transform = transform
         self.img_size = (img_size, img_size)
-        self.image_paths = glob.glob(f"./data/{mode}/image/*.npy")[:num_samples]
+        image_paths = glob.glob(f"./data/{mode}/image/*.npy")[:num_samples]
+        self.image_paths = sorted(image_paths, key=self.extract_number)
 
     def __len__(self):
         return len(self.image_paths)
+
+    def extract_number(self, filename):
+        base = os.path.basename(filename)
+        number = os.path.splitext(base)[0]
+        return int(number)
 
     def __getitem__(self, idx):
         img_path = self.image_paths[idx]
         image = np.load(img_path)
         mask_path = img_path.replace("image", "mask")
         mask = np.load(mask_path)
-        _, image = cv2.threshold(image, 0.7, 1, cv2.THRESH_BINARY)
+        _, image = cv2.threshold(image, 0.9, 1, cv2.THRESH_BINARY)
         return image, mask
 
 
@@ -136,35 +129,6 @@ def create_dataloader(num_samples: int = 32,
 if __name__ == "__main__":
 
     img_size = 128
-    generate_data(mode="train", num_samples=1280, img_size=img_size, fig_size=2)
+    generate_data(mode="train", num_samples=1024, img_size=img_size, fig_size=2)
     generate_data(mode="test", num_samples=128, img_size=img_size, fig_size=2)
     generate_data(mode="validation", num_samples=128, img_size=img_size, fig_size=2)
-
-    # dataloader = create_dataloader(img_size=512)
-
-    # for images, masks in dataloader:
-    #     print(images.shape, masks.shape)
-    #     break
-
-    # print("Individual image size: ", images.shape, images.max(), images.min())
-    # print("Corresponding mask size: ", masks.shape, masks.max(), masks.min())
-
-    # n = 2
-    # fig, axes = plt.subplots(4, n, figsize=(9, 5))
-    # axes = axes.ravel()
-    # for i in range(n):
-    #     axes[i].imshow(images[i].permute(1, 2, 0))
-    #     axes[i].axis("off")
-    #     axes[i + n].imshow(255 * masks[i])
-    #     axes[i + n].axis("off")
-    #     axes[i + n].set_title(f"{np.unique(masks[i])}")
-
-    # for i in range(n):
-    #     axes[i + 2 * n].imshow(images[i + 6].permute(1, 2, 0))
-    #     axes[i + 2 * n].axis("off")
-    #     axes[i + 3 * n].imshow(255 * masks[i + 6])
-    #     axes[i + 3 * n].axis("off")
-    #     axes[i + 3 * n].set_title(f"{np.unique(masks[i + 6])}")
-
-    # plt.tight_layout()
-    # plt.savefig("generated_example.png")

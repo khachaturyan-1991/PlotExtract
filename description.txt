@@ -1,2 +1,27 @@
-Now when I believe Tersely is the best, I will train a bit longer to see if segmentation can be still improved;
-Besides for the first time accuracy is implemented
+Testing implementation of Dice + MSE.
+MSE computes where from the logic and not the mask; but skip if where returns nothing
+
+Result:
+Segmentation did not happen since. The dice weight was only 0.1 while MSE could not provide result via prediction masking. It however segmenting well via MSE with mask masking. Obviously loss should contain segmentation. Probably good approach can be using Dice + MSE (via red masking) where the first one segments and the second make it more precise.
+----------
+Will now give more poser to Dice and keep MSE (via prediction)
+
+Result:
+Surprisingly even dice did not work bringing all to zero; Seems that MSE (via mask) was the best choice
+------
+Will now run with 0.1 for Dice and give most priority to MSE via mask
+
+Result:
+MSE via mask works very well; it segments plots in a couple of steps!
+-----
+Will now just set Dice weight to 0;
+
+Result:
+As expected given all the power to MSE results in way better loss and segmentation.
+-----
+Now will give more power to Dice to show how it fails. Let it be 0.4
+
+Result:
+Segmentation was still good. Virtually same quality between 0, 0.1, 0.4
+----
+Will not set it to only Dice

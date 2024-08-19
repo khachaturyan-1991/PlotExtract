@@ -73,6 +73,7 @@ class CCD:
             self.cluster_counter += 1
             if self.cluster_counter == 2:
                 self.cluster_counter = 0
+                self.plots.num_of_plots -= 1
                 return n_clusters
             else:
                 return self.plots.num_of_plots
@@ -134,7 +135,7 @@ class CCD:
         updates expectations based on kinetics
         accounting velocity and acceleration coefficients
         """
-        for key in self.plots.kinetics.keys():
+        for key in self.plots.kinetics:
             x = np.array(self.plots.kinetics[key][0])
             dx = np.array(self.plots.kinetics[key][1])
             dx2 = np.array(self.plots.kinetics[key][2])
@@ -181,7 +182,7 @@ class CCD:
             if np.all(piece == 0):
                 n_of_clusters = 0
             else:
-                n_of_clusters = self.estimate_cluster_num(piece)
+                n_of_clusters = self.estimate_cluster_num(piece, eps=2, min_samples=1)
             # make detections
             if n_of_clusters > 0:
                 n_of_clusters = self.n_clusters_controle(n_clusters=n_of_clusters)
@@ -196,12 +197,12 @@ if __name__ == "__main__":
     from models_zoo.unet import UNet
     from data.data import create_dataloader
     from utils import load_model
-    import cv2
+    # import cv2
 
     LIST_OF_COLOURS = {0: "blue", 1: "lime", 2: "red", 3: "magenta"}
     BATCH_SIZE = 32
     model = UNet()
-    model = load_model(model, "08-09-07-16.pth")
+    model = load_model(model, "./weights/08-09-07-16.pth")
     test_dataloader = create_dataloader(mode="test", num_samples=128, batch_size=BATCH_SIZE, shuffle=False, img_size=128)
     img, mask = next(iter(test_dataloader))
 

@@ -74,12 +74,3 @@ if __name__ == "__main__":
                                       output_freq=OUTPUT_FREQUENCY,
                                       epochs=EPOCHS,
                                       first_step=FIRST_STEP)
-
-    # plot_hystory(h_train,
-    #              h_test,
-    #              f"./history_plots/{DEPTH}_{IMG_SIZE}_{FIG_SIZE}")
-
-    # df = pd.DataFrame({"step": list(h_train.keys()),
-    #                    "train_loss": list(h_train.values()),
-    #                    "test_loss": list(h_test.values())})
-    # df.to_csv(f"./csv/{DEPTH}_{IMG_SIZE}_{FIG_SIZE}.csv", index=False)

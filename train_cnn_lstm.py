@@ -1,9 +1,8 @@
 import torch
 from utils import parse_arguments, count_torch_parameters, read_run_description, load_model
-from models_zoo.unet import UNet
-from data.data import create_dataloader
-from train.train import Trainer
-from metrics.losses import DiceLoss, SMSE, CombinedLoss
+from models_zoo.cnn_lstm import CNN_LSTM
+from data.loader import create_numbers_loader
+from train.cnn_lstm_trainer import Trainer
 from torchinfo import summary
 import datetime
 import matplotlib
@@ -17,42 +16,37 @@ if __name__ == "__main__":
     DEVICE = args.device.lower()
     EPOCHS = args.epochs
     OUTPUT_FREQUENCY = args.output_freq
-    IMG_SIZE = args.img_size
-    FIG_SIZE = args.fig_size
-    DEPTH = args.depth
     RUN_DESCRIPTION = args.run_description
     EXPERIMENT_NAME = args.experiment_name
     LR = args.lr
     WEIGHTS = args.weights
-    DICE_COEF = args.dice_coef
 
     time_stamp = datetime.datetime.now()
     run_name = time_stamp.strftime("%m-%d-%H-%M")
     if RUN_DESCRIPTION:
         run_description = read_run_description()
     else:
-        run_description = f"DicePart: {DICE_COEF}"
+        run_description = "torm"
     print("Running on: ", DEVICE)
     print("With Run Time: ", run_name)
 
     mlflow_input = {"experiment_name": EXPERIMENT_NAME,
-                    "img_size": IMG_SIZE,
-                    "fig_size": FIG_SIZE,
-                    "depth": DEPTH,
                     "batch_size": BATCH_SIZE,
                     "run_name": run_name,
                     "run_description": run_description,
-                    "learning_rate": LR,
-                    "dice_coef": DICE_COEF}
+                    "learning_rate": LR}
 
-    train_dataloader = create_dataloader(mode="train", num_samples=1280, batch_size=BATCH_SIZE, shuffle=True, img_size=IMG_SIZE)
-    test_dataloader = create_dataloader(mode="test", num_samples=128, batch_size=BATCH_SIZE, shuffle=False, img_size=IMG_SIZE)
-    val_dataloader = create_dataloader(mode="validation", num_samples=128, batch_size=BATCH_SIZE, shuffle=False, img_size=IMG_SIZE)
+    train_dataloader = create_numbers_loader(mode="train", num_samples=2600,
+                                             batch_size=BATCH_SIZE, shuffle=True)
+    test_dataloader = create_numbers_loader(mode="test", num_samples=32,
+                                            batch_size=BATCH_SIZE, shuffle=False)
+    val_dataloader = create_numbers_loader(mode="validation", num_samples=128,
+                                           batch_size=BATCH_SIZE, shuffle=False)
 
-    model = UNet(depth=DEPTH)
+    model = CNN_LSTM(num_classes=10)
     if isinstance(WEIGHTS, str):
         model = load_model(model=model, file_name=WEIGHTS)
-    summary(model, input_size=(1, 3, IMG_SIZE, IMG_SIZE))
+    summary(model, input_size=(1, 1, 30, 30))
     count_torch_parameters(model)
 
     model.to(device=DEVICE)
@@ -60,11 +54,10 @@ if __name__ == "__main__":
                              lr=LR)
 
     model_train = Trainer(model=model,
-                          loss_fn=CombinedLoss(dice_weight=DICE_COEF),
-                          segment_loss=DiceLoss(),
-                          numeric_loss=SMSE(),
+                          loss_fn=torch.nn.CrossEntropyLoss(),
                           optimizer=optim,
                           device=DEVICE,
+                          num_classes=10,  # has to be input
                           **mlflow_input)
 
     FIRST_STEP = 0

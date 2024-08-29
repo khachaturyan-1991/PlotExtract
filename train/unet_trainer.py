@@ -45,6 +45,7 @@ class Trainer:
         step_loss = 0
         n = 0
         for X, masks in dataloader:
+            self.optimizer.zero_grad()
             X = X.type(torch.float32)
             X = X.to(self.device)
             masks = masks.type(torch.float32)
@@ -64,17 +65,18 @@ class Trainer:
         step_loss = 0
         step_accuracy = 0
         n = 0
-        for X, masks in dataloader:
-            X = X.type(torch.float32)
-            X = X.to(self.device)
-            masks = masks.type(torch.float32)
-            masks = masks.to(self.device)
-            pred = self.model(X)
-            segment_loss = self.segment_loss(pred, masks)
-            numeric_loss = self.numeric_loss(pred, masks.float())
-            step_loss += segment_loss.item()
-            step_accuracy += numeric_loss.item()
-            n += 1
+        with torch.inference_mode():
+            for X, masks in dataloader:
+                X = X.type(torch.float32)
+                X = X.to(self.device)
+                masks = masks.type(torch.float32)
+                masks = masks.to(self.device)
+                pred = self.model(X)
+                segment_loss = self.segment_loss(pred, masks)
+                numeric_loss = self.numeric_loss(pred, masks.float())
+                step_loss += segment_loss.item()
+                step_accuracy += numeric_loss.item()
+                n += 1
         return step_loss / n, step_accuracy / n
 
     def test_step(self,
@@ -84,15 +86,16 @@ class Trainer:
         self.model.eval()
         step_loss = 0
         n = 0
-        for X, masks in dataloader:
-            X = X.type(torch.float32)
-            X = X.to(self.device)
-            masks = masks.type(torch.float32)
-            masks = masks.to(self.device)
-            pred = self.model(X)
-            loss = self.loss_fn(pred, masks)
-            step_loss += loss.item()
-            n += 1
+        with torch.inference_mode():
+            for X, masks in dataloader:
+                X = X.type(torch.float32)
+                X = X.to(self.device)
+                masks = masks.type(torch.float32)
+                masks = masks.to(self.device)
+                pred = self.model(X)
+                loss = self.loss_fn(pred, masks)
+                step_loss += loss.item()
+                n += 1
         print("Loss per test: ", step_loss / n)
         pred = pred.cpu()
         masks = masks.cpu()

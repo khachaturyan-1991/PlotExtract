@@ -138,7 +138,7 @@ class Trainer:
                 avg_seg_loss[first_step + epoch] = seg_loss
                 if epoch == 1:
                     mlflow.log_artifact("./metrics/losses.py")
-                    mlflow.log_artifact("./data/data.py")
+                    mlflow.log_artifact("./data/data_plots.py")
                     mlflow.log_artifact("./models_zoo/unet.py")
                 if (epoch + 1) % 20 == 0:
                     saved_under = "./intermediate.pth"

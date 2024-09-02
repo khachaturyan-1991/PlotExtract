@@ -93,11 +93,11 @@ class Trainer:
             avg_test_accuracy = correct_predictions / total_predictions
         print("Loss per test: ", avg_test_loss, "| Accuracy per test: ", avg_test_accuracy)
         y_pred = [tuple(digits.tolist()) for digits in y_pred]
-        _, ax = plt.subplots(1, 5)
+        _, ax = plt.subplots(5, 1)
         X = X.to("cpu")
         for n in range(5):
             ax[n].imshow(X[n][0])
-            ax[n].set_title(f"{y_pred[n][0]} {y_pred[n][1]}")
+            ax[n].set_title(f"{y_pred[n][0]}{y_pred[n][1]}{y_pred[n][2]} | {y_pred[n][3]}{y_pred[n][4]}{y_pred[n][5]}")
             ax[n].axis("off")
         plt.tight_layout()
         plt.savefig(f"./res_imgs/{epoch}.png")

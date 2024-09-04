@@ -45,7 +45,7 @@ if __name__ == "__main__":
                     "learning_rate": LR,
                     "dice_coef": DICE_COEF}
 
-    train_dataloader = create_plots_loader(mode="train", num_samples=1280,
+    train_dataloader = create_plots_loader(mode="train", num_samples=128,
                                            batch_size=BATCH_SIZE, shuffle=True, img_size=IMG_SIZE)
     test_dataloader = create_plots_loader(mode="test", num_samples=128,
                                           batch_size=BATCH_SIZE, shuffle=False, img_size=IMG_SIZE)

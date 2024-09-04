@@ -36,7 +36,7 @@ if __name__ == "__main__":
                     "run_description": run_description,
                     "learning_rate": LR}
 
-    train_dataloader = create_numbers_loader(mode="train", num_samples=600,
+    train_dataloader = create_numbers_loader(mode="train", num_samples=1280,
                                              batch_size=BATCH_SIZE, shuffle=True)
     test_dataloader = create_numbers_loader(mode="test", num_samples=32,
                                             batch_size=BATCH_SIZE, shuffle=True)
@@ -46,7 +46,7 @@ if __name__ == "__main__":
     model = CNN_LSTM(num_classes=10)
     if isinstance(WEIGHTS, str):
         model = load_model(model=model, file_name=WEIGHTS)
-    summary(model, input_size=(1, 1, 30, 250))
+    summary(model, input_size=(1, 1, 26, 296))
     count_torch_parameters(model)
 
     model.to(device=DEVICE)

@@ -10,9 +10,9 @@ class CNN_LSTM(nn.Module):
             nn.Conv2d(1, 32, kernel_size=3, stride=1, padding=1),  # output: (32, 30, 250)
             nn.ReLU(),
             nn.MaxPool2d(2, 2),  # output: (32, 15, 125)
-            nn.Conv2d(32, 32, kernel_size=3, stride=1, padding=1),  # output: (64, 15, 125)
-            nn.ReLU(),
             nn.Conv2d(32, 64, kernel_size=3, stride=1, padding=1),  # output: (64, 15, 125)
+            nn.ReLU(),
+            nn.Conv2d(64, 64, kernel_size=3, stride=1, padding=1),  # output: (64, 15, 125)
             nn.ReLU(),
             nn.MaxPool2d(2, 2)  # output: (64, 7, 62)
         )

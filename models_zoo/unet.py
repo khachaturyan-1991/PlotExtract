@@ -113,8 +113,8 @@ class UNet(nn.Module):
 if __name__ == "__main__":
     import torch
     model = UNet(depth=3)
-    # summary(model, input_size=(1, 3, 300, 300))
-
     X = torch.randn(1, 3, 296, 296)
+    summary(model, input_size=X.shape)
+
     result = model(X)
     print("Output shape: ", result.shape)

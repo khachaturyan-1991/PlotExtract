@@ -77,7 +77,7 @@ def read_run_description(file_name: str = "description.txt"):
 
 def load_model(model: torch.nn.Module, file_name: str):
     assert os.path.exists(file_name), "No weights were found"
-    state_dict = torch.load(file_name, weights_only=True)
+    state_dict = torch.load(file_name, map_location="cpu", weights_only=True)
     model.load_state_dict(state_dict)
     print("Models is loaded from: ", file_name)
     return model

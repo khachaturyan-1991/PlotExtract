@@ -54,7 +54,7 @@ if __name__ == "__main__":
         origin = img[n]
         my_img = pred[n][1]
         my_img[my_img < 0.8] = 0
-        my_img[my_img > 0.5] = 1
+        my_img[my_img > 0.8] = 1
 
         tracker = Tracker()
         obj = CCD(tracker, iniertia=0.7, velocity=1, accelaration=3)

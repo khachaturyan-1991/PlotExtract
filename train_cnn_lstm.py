@@ -36,9 +36,9 @@ if __name__ == "__main__":
                     "run_description": run_description,
                     "learning_rate": LR}
 
-    train_dataloader = create_numbers_loader(mode="train", num_samples=1280,
+    train_dataloader = create_numbers_loader(mode="train", num_samples=1792,
                                              batch_size=BATCH_SIZE, shuffle=True)
-    test_dataloader = create_numbers_loader(mode="test", num_samples=32,
+    test_dataloader = create_numbers_loader(mode="test", num_samples=128,
                                             batch_size=BATCH_SIZE, shuffle=True)
     val_dataloader = create_numbers_loader(mode="validation", num_samples=128,
                                            batch_size=BATCH_SIZE, shuffle=False)

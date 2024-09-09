@@ -1,9 +1,8 @@
 import numpy as np
 import matplotlib.pyplot as plt
-
+import cv2
 from sklearn.cluster import KMeans
 from scipy.optimize import linear_sum_assignment
-
 from sklearn.cluster import DBSCAN
 
 
@@ -190,6 +189,59 @@ class CCD:
                 detections += np.array([step * p_size, 0])
                 # now solving an asignment problem
                 self.assign(detections)
+
+
+class RelateCoordinates:
+
+    def __init__(self, segmented_labels):
+        _, self.mask = cv2.threshold(segmented_labels, 0.9, 1, cv2.THRESH_BINARY)
+
+    def estimate_cluster_num(self, eps=2, min_samples=1):
+        """uses DBSCAN to estimate number of cluster, i.e. number"""
+        y, x = np.where(self.mask)
+        coordinates = np.column_stack((x, y))
+        db = DBSCAN(eps=eps, min_samples=min_samples).fit(coordinates)
+        labels = db.labels_
+        unique_labels = set(labels)
+        unique_labels.discard(-1)
+        return len(unique_labels)
+
+    def get_cetners(self):
+        """knowing number of clusters find its locations
+            using KMean"""
+        n_of_cluster = self.estimate_cluster_num()
+        y, x = np.where(self.mask)
+        kmeans = KMeans(n_clusters=n_of_cluster)
+        kmeans.fit(np.column_stack((x, y)))
+        return kmeans.cluster_centers_
+
+    def get_uniform_positions(self, tolerance: int = 15):
+        """since detectins are not aling along axes,
+            they are being align using mean posiiton"""
+        centers = self.get_cetners()
+        coords = []
+        for slice in range(2):
+            # Determine the minimum or maximum value along the current axis
+            x_min_y_max = np.min(centers, axis=0) if slice == 0 else np.max(centers, axis=0)
+            threshold = np.abs(centers[..., slice] - x_min_y_max[slice]) < tolerance
+            # Select the positions close to x_min or y_max
+            selected_positions = centers[threshold]
+            # Align all positions along the mean of the current axis
+            mean_value = np.mean(selected_positions, axis=0)
+            selected_positions[..., slice] = int(mean_value[slice])
+            # Sort the other axis values and create uniform spacing
+            sorted_values = np.sort(selected_positions[..., 1 - slice])
+            spacing = sorted_values - np.roll(sorted_values, 1, axis=0)
+            spacing = int(np.mean(spacing[1:]))
+            values_1 = [sorted_values[0] + spacing * i for i in range(len(sorted_values))]
+            values_2 = [sorted_values[-1] - spacing * i for i in range(len(sorted_values))]
+            uniform_values = (np.array(values_1) + np.array(values_2)[::-1]) // 2
+            # Combine aligned positions with uniform distribution
+            if slice == 0:
+                coords.append(np.array([(int(mean_value[slice]), int(v)) for v in uniform_values]))
+            else:
+                coords.append(np.array([(int(v), int(mean_value[slice])) for v in uniform_values]))
+        return {"x": coords[1], "y": coords[0]}
 
 
 if __name__ == "__main__":

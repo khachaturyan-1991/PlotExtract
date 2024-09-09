@@ -1,3 +1,4 @@
+import numpy as np
 import matplotlib.pylab as plt
 import argparse
 import os
@@ -76,8 +77,47 @@ def read_run_description(file_name: str = "description.txt"):
 
 
 def load_model(model: torch.nn.Module, file_name: str):
+    """loads weights to the model"""
     assert os.path.exists(file_name), "No weights were found"
     state_dict = torch.load(file_name, map_location="cpu", weights_only=True)
     model.load_state_dict(state_dict)
     print("Models is loaded from: ", file_name)
     return model
+
+
+def embedded_to_number(embedded: torch.tensor):
+    """
+    extracts numbers from an embedded prediciton
+    """
+    em = torch.argmax(embedded, axis=2)
+    em = em[0].numpy()
+    nums = []
+    for i in range(2):
+        sign = -1 + 2 * em[i * 3]
+        num = int(f"{em[i*3 + 1]}{em[i*3 + 2]}")
+        nums.append(sign * num)
+    return nums
+
+
+class Rescaler:
+    # TODO actually I get positions of labels and not of the points
+    """Each point of a segmented plot is expressed in pixels.
+       The class estimates rescaling parameters
+        to turn croodintaes from pixesl to an image coordinates.
+        """
+    def __init__(self, labels: dict, nums: dict) -> None:
+        self.r0, self.delta = self.scaling_factor(labels, nums)
+
+    def scaling_factor(self, labels, nums):
+        """Finds (0,0) point (r0) in pixels
+            as well as unit vector (delta) in pixels"""
+        r0 = np.array([labels["x"][-1][0] + labels["x"][0][0],
+                       labels["y"][-1][1] + labels["y"][0][1]]) / 2
+        delta = np.array([(labels["x"][-1][0] - labels["x"][0][0]) / (nums["x"][1] - nums["x"][0]),
+                          (labels["y"][-1][1] - labels["y"][0][1]) / (nums["y"][1] - nums["y"][0])])
+        return r0, delta
+
+    def rescale(self, point):
+        """finds coordinates of a point given in pixels
+            in image coordinates"""
+        return (point - self.r0) / self.delta

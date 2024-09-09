@@ -93,7 +93,7 @@ class Trainer:
             avg_test_accuracy = correct_predictions / total_predictions
         print("Loss per test: ", avg_test_loss, "| Accuracy per test: ", avg_test_accuracy)
         y_pred = [tuple(digits.tolist()) for digits in y_pred]
-        _, ax = plt.subplots(5, 1)
+        _, ax = plt.subplots(1, 5)
         X = X.to("cpu")
         for n in range(5):
             ax[n].imshow(X[n][0])

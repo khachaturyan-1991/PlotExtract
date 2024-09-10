@@ -1,5 +1,5 @@
 PlotExtract
-
+'''Bash
 PlotExtract is a Python project aimed at extracting numerical information from images with plots using deep learning. The project focuses on segmenting relevant parts of the image and extracting the corresponding axis labels as text. This project is useful for anyone needing to automate the extraction of digital plot data from images, such as researchers and data analysts.
 
 Features
@@ -68,3 +68,4 @@ For any questions or issues, feel free to contact the author:
 
 	•	Your Name: dr.khachaturyan@gmail.com
 	•	GitHub: https://github.com/khachaturyan-1991
+'''

@@ -43,7 +43,7 @@ Similar to the data generation step, the mode parameter can be set to either seg
 
 
 Project Structure
-
+'''
 
 PlotExtract/
 │
@@ -79,6 +79,7 @@ PlotExtract/
 ├── metrics_zoo/                   # Custom metrics and loss functions
 │   └── losses.py                  # Contains loss functions for training
 
+'''
 Contributing
 
 If you want to contribute to PlotExtract, feel free to submit pull requests or open issues for feature suggestions or bug reports. Make sure to add unit tests for any new features or changes.

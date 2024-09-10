@@ -36,8 +36,8 @@ if __name__ == "__main__":
     import matplotlib.pylab as plt
     from models_zoo.unet import UNet
     from data.data import create_dataloader
-    from utils import load_model
-    from tracker import CCD, Tracker
+    from utils.utils import load_model
+    from utils.tracker import CCD, Tracker
 
     fit_machine = FitExtract()
 

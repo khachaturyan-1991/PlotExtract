@@ -4,8 +4,8 @@ import matplotlib.pylab as plt
 import torch
 from models_zoo.unet import UNet
 from models_zoo.cnn_lstm import CNN_LSTM
-from tracker import Tracker, CCD, RelateCoordinates
-from utils import load_model, embedded_to_number, Rescaler
+from utils.tracker import Tracker, CCD, RelateCoordinates
+from utils.utils import load_model, embedded_to_number, Rescaler
 import matplotlib
 matplotlib.use('Agg')
 

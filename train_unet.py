@@ -1,9 +1,9 @@
 import torch
-from utils import parse_arguments, count_torch_parameters, read_run_description, load_model
+from utils.utils import parse_arguments, count_torch_parameters, read_run_description, load_model
 from models_zoo.unet import UNet
 from data.loader import create_plots_loader
-from train.unet_trainer import Trainer
-from metrics.losses import DiceLoss, SMSE, CombinedLoss
+from train.trainer_unet import Trainer
+from metrics_zoo.losses import DiceLoss, SMSE, CombinedLoss
 from torchinfo import summary
 import datetime
 import matplotlib

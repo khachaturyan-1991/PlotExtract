@@ -1,8 +1,8 @@
 import torch
-from utils import parse_arguments, count_torch_parameters, read_run_description, load_model
+from utils.utils import parse_arguments, count_torch_parameters, read_run_description, load_model
 from models_zoo.cnn_lstm import CNN_LSTM
 from data.loader import create_numbers_loader
-from train.cnn_lstm_trainer import Trainer
+from train.trainer_cnn_lstm import Trainer
 from torchinfo import summary
 import datetime
 import matplotlib

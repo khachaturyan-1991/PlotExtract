@@ -44,15 +44,40 @@ Similar to the data generation step, the mode parameter can be set to either seg
 
 Project Structure
 
+
 PlotExtract/
 │
-├── plot_extract.py        # Main script to run the extraction pipeline
-├── unet/                  # Contains the UNet architecture for segmentation
-├── crnn/                  # Contains the CNN-LSTM architecture for label extraction
-├── data/                  # Folder for any training or test data
-├── requirements.txt       # List of dependencies for the project
-├── README.md              # This file
-└── tests/                 # Unit tests for different parts of the project
+├── plot_extract.py                # Main script to run the extraction pipeline
+├── data_gen.py                    # Script to generate data for training and testing
+├── train.py                       # Script to run the training pipeline
+│
+├── notebooks/                     # Jupyter notebooks for experimentation
+│   ├── TrainBeast.ipynb
+│   ├── TextBeast.ipynb
+│   └── WorkingBeast.ipynb
+│
+├── model_zoo/                     # Contains the model implementations
+│   ├── unet.py                    # UNet model for segmentation
+│   └── cnn_lstm.py                # CNN-LSTM model for label extraction
+│
+├── data/                          # Folder for generated data
+│   ├── generate_labels.py         # Script to generate label data
+│   ├── generate_plots.py          # Script to generate plot data
+│   ├── labels/                    # Directory for labels data
+│   │   ├── train/                 # Training labels
+│   │   ├── validation/            # Validation labels
+│   │   └── test/                  # Test labels
+│   └── plots/                     # Directory for plot data
+│       ├── train/                 # Training plot data
+│       ├── validation/            # Validation plot data
+│       └── test/                  # Test plot data
+│
+├── train_zoo/                     # Scripts for training models
+│   ├── train_unet.py              # Training script for the UNet model
+│   └── train_cnn_lstm.py          # Training script for the CNN-LSTM model
+│
+├── metrics_zoo/                   # Custom metrics and loss functions
+│   └── losses.py                  # Contains loss functions for training
 
 Contributing
 

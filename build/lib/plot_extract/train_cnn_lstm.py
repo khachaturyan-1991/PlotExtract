@@ -19,6 +19,7 @@ if __name__ == "__main__":
     RUN_DESCRIPTION = args.run_description
     EXPERIMENT_NAME = args.experiment_name
     LR = args.lr
+    AXIS = args.axis
     WEIGHTS = args.weights
 
     time_stamp = datetime.datetime.now()
@@ -36,11 +37,11 @@ if __name__ == "__main__":
                     "run_description": run_description,
                     "learning_rate": LR}
 
-    train_dataloader = create_numbers_loader(mode="train", num_samples=1792,
+    train_dataloader = create_numbers_loader(mode="train", axis=AXIS, num_samples=1792,
                                              batch_size=BATCH_SIZE, shuffle=True)
-    test_dataloader = create_numbers_loader(mode="test", num_samples=128,
+    test_dataloader = create_numbers_loader(mode="test", axis=AXIS, num_samples=128,
                                             batch_size=BATCH_SIZE, shuffle=True)
-    val_dataloader = create_numbers_loader(mode="validation", num_samples=128,
+    val_dataloader = create_numbers_loader(mode="validation", axis=AXIS, num_samples=128,
                                            batch_size=BATCH_SIZE, shuffle=False)
 
     model = CNN_LSTM(num_classes=10)

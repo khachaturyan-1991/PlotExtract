@@ -1,3 +1,0 @@
-python train_unet.py --device mps --epochs 200 --output_freq 20 --depth 3 --fig_size 3 --img_size 300 --lr 3e-4 --dice_coef 0.0
-
-python train_cnn_lstm.py --device mps --epochs 100 --output_freq 10 --depth 3 --fig_size 3 --img_size 300 --lr 3e-4 --dice_coef 0.0

@@ -15,10 +15,10 @@ if "__main__" == __name__:
     # prepare models
     DEPTH = 3
     unet_model = UNet(depth=DEPTH)
-    unet_model = load_model(unet_model, "segmentation.pth")
+    unet_model = load_model(unet_model, "./pretrained/segmentation.pth")
     crnn_models = {"x": CNN_LSTM(), "y": CNN_LSTM()}
     for i in "x y".split():
-        crnn_x_model = load_model(crnn_models[i], f"{i}text.pth")
+        crnn_x_model = load_model(crnn_models[i], f"./pretrained/{i}text.pth")
     # get image
     img = np.load("./data/plots/test/image/0.npy")
     plt.imshow(np.transpose(img, (1, 2, 0)))

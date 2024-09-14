@@ -216,8 +216,13 @@ class RelateCoordinates:
         return kmeans.cluster_centers_
 
     def get_uniform_positions(self, tolerance: int = 15):
-        """since detectins are not aling along axes,
-            they are being align using mean posiiton"""
+        """
+        Since detectins are not aling along axes,
+        they are being align using mean posiiton
+        Returns
+        -------
+        Coordinates of x- and y-labesl in a dictionary:
+        """
         centers = self.get_cetners()
         coords = []
         for slice in range(2):
@@ -248,7 +253,7 @@ if __name__ == "__main__":
 
     from models_zoo.unet import UNet
     from data.data import create_dataloader
-    from utils import load_model
+    from utils.utils import load_model
     # import cv2
 
     LIST_OF_COLOURS = {0: "blue", 1: "lime", 2: "red", 3: "magenta"}

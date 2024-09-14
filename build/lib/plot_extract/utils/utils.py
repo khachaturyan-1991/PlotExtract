@@ -44,6 +44,7 @@ def parse_arguments():
     parser.add_argument("--weights", type=str, default=None, help="Weights of a pretrianed model")
     parser.add_argument("--dice_coef", type=float, default=0.9, help="Dice Loss contribution")
     parser.add_argument("--num_of_classes", type=int, default=2, help="Numper of plots on a figure")
+    parser.add_argument("--axis", type=str, default="x", help="choose which axis lable must be trained x or y")
     args = parser.parse_args()
     return args
 

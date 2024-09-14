@@ -4,23 +4,29 @@ import matplotlib.pylab as plt
 import torch
 from models_zoo.unet import UNet
 from models_zoo.cnn_lstm import CNN_LSTM
-from tracker import Tracker, CCD, RelateCoordinates
-from utils import load_model, embedded_to_number, Rescaler
+from utils.tracker import Tracker, CCD, RelateCoordinates
+from utils.utils import load_model, embedded_to_number, Rescaler
+import os
 import matplotlib
 matplotlib.use('Agg')
 
 
-if "__main__" == __name__:
-    RES_FOLDER = './torm/'
+def plots_extract():
+    if not os.path.exists("./checkpoints"):
+        os.mkdir("./checkpoints")
+    if not os.path.exists("./checkpoints/results"):
+        os.mkdir("./checkpoints/results/")
+    RES_FOLDER = "./checkpoints/results/"
     # prepare models
     DEPTH = 3
     unet_model = UNet(depth=DEPTH)
-    unet_model = load_model(unet_model, "./pretrained/segmentation.pth")
+    unet_model = load_model(unet_model, "./pretrained/segmentation2.pth")
     crnn_models = {"x": CNN_LSTM(), "y": CNN_LSTM()}
     for i in "x y".split():
-        crnn_x_model = load_model(crnn_models[i], f"./pretrained/{i}text.pth")
+        crnn_models[i] = load_model(crnn_models[i], f"./pretrained/{i}text.pth")
     # get image
     img = np.load("./data/plots/test/image/0.npy")
+    _, img = cv2.threshold(img, 0.9, 1, cv2.THRESH_BINARY)
     plt.imshow(np.transpose(img, (1, 2, 0)))
     plt.savefig(RES_FOLDER + "original.png")
     # segment
@@ -57,11 +63,9 @@ if "__main__" == __name__:
     # rescale
     rescaler = Rescaler(extracted_axes, nums)
     # alltogether
-    thresh = 0.8
     plots_extracted = seg_res[0][1].copy()
-    _, plots_extracted = cv2.threshold(plots_extracted, thresh, 1, cv2.THRESH_BINARY)
     tracker = Tracker()
-    extractor = CCD(tracker, iniertia=0.7, velocity=1, accelaration=3)
+    extractor = CCD(tracker, iniertia=0.9, velocity=1, accelaration=3)
     extractor.run(plots_extracted, p_size=1)
     trace = tracker.trace
 
@@ -70,7 +74,7 @@ if "__main__" == __name__:
     for key in trace.keys():
         extracted_plots = np.array(trace[key])
         res = rescaler.rescale(extracted_plots)
-        ax[1].plot(res[:, 0], -res[:, 1], c="lime")
+        ax[1].plot(res[:, 0], -res[:, 1])
     ax[1].set_xlim(-2.2, 2.2)
     ax[1].set_ylim(-10.2, 10.2)
     plt.savefig(RES_FOLDER + "final.png")

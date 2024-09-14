@@ -1,4 +1,5 @@
 import numpy as np
+import cv2
 import matplotlib.pylab as plt
 import torch
 from models_zoo.unet import UNet
@@ -25,6 +26,7 @@ def plots_extract():
         crnn_models[i] = load_model(crnn_models[i], f"./pretrained/{i}text.pth")
     # get image
     img = np.load("./data/plots/test/image/0.npy")
+    _, img = cv2.threshold(img, 0.9, 1, cv2.THRESH_BINARY)
     plt.imshow(np.transpose(img, (1, 2, 0)))
     plt.savefig(RES_FOLDER + "original.png")
     # segment
@@ -63,7 +65,7 @@ def plots_extract():
     # alltogether
     plots_extracted = seg_res[0][1].copy()
     tracker = Tracker()
-    extractor = CCD(tracker, iniertia=0.9, velocity=1, accelaration=1)
+    extractor = CCD(tracker, iniertia=0.9, velocity=1, accelaration=3)
     extractor.run(plots_extracted, p_size=1)
     trace = tracker.trace
 
@@ -72,7 +74,7 @@ def plots_extract():
     for key in trace.keys():
         extracted_plots = np.array(trace[key])
         res = rescaler.rescale(extracted_plots)
-        ax[1].plot(res[:, 0], -res[:, 1])  # , c="lime")
+        ax[1].plot(res[:, 0], -res[:, 1])
     ax[1].set_xlim(-2.2, 2.2)
     ax[1].set_ylim(-10.2, 10.2)
     plt.savefig(RES_FOLDER + "final.png")

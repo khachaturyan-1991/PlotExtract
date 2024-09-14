@@ -23,7 +23,6 @@ class Tracker:
 class CCD:
 
     def __init__(self, tracker_dict, iniertia: float = 0.8, velocity: float = 10, accelaration: float = 5):
-
         self.plots = tracker_dict
         self.inertia = iniertia
         self.n_missdetections = 0
@@ -61,16 +60,16 @@ class CCD:
         plt.title(n_clusters)
         plt.show()
 
-    def n_clusters_controle(self, n_clusters):
+    def n_clusters_controle(self, n_clusters, criterion: int = 2):
         """
         controles number of cluster reduction
         to prevent missdetectins on intersections
         Less amount of clusters should be detected
-            several times in a raw to be confirmed
+            several times (criterion) in a raw to be confirmed
         """
         if n_clusters < self.plots.num_of_plots:
             self.cluster_counter += 1
-            if self.cluster_counter == 2:
+            if self.cluster_counter == criterion:
                 self.cluster_counter = 0
                 self.plots.num_of_plots -= 1
                 return n_clusters
@@ -79,6 +78,15 @@ class CCD:
         else:
             self.cluster_counter = 0
             return n_clusters
+
+    def add_new_plots(self, new_detections):
+        """
+        adds new plot for new detections
+        """
+        for detection in new_detections:
+            self.plots.kinetics[self.plots.num_of_plots] = [detection, (0, 0), (0, 0)]
+            self.plots.trace[self.plots.num_of_plots] = []
+            self.plots.num_of_plots += 1
 
     def assign(self, detections):
         """
@@ -102,15 +110,6 @@ class CCD:
         self.update_expectations()
         # d. update trace dict
         self.update_trace()
-
-    def add_new_plots(self, new_detections):
-        """
-        adds new plot for new detections
-        """
-        for detection in new_detections:
-            self.plots.kinetics[self.plots.num_of_plots] = [detection, (0, 0), (0, 0)]
-            self.plots.trace[self.plots.num_of_plots] = []
-            self.plots.num_of_plots += 1
 
     def update_kinetics(self, new_positions):
         """
@@ -174,7 +173,7 @@ class CCD:
         """
         splits image into pieces and implements cluster tracking slice by slice
         """
-        thresh = 0.7
+        thresh = 0.9
         _, my_img = cv2.threshold(my_img, thresh, 1, cv2.THRESH_BINARY)
         my_img = my_img[:265, 40:]  # trying to cut out only plots
         n_steps = my_img.shape[-1] // p_size
@@ -256,7 +255,7 @@ class RelateCoordinates:
 if __name__ == "__main__":
 
     from models_zoo.unet import UNet
-    from data.data import create_dataloader
+    from actors.generate_plots import create_dataloader
     from utils.utils import load_model
     # import cv2
 
@@ -272,9 +271,7 @@ if __name__ == "__main__":
     for n in range(BATCH_SIZE):
         origin = img[n]
         my_img = pred[n][1]
-        my_img[my_img < 0.8] = 0
-        my_img[my_img > 0.5] = 1
-        # my_img = cv2.erode(my_img, np.ones((1, 2), np.uint8), cv2.BORDER_REFLECT)
+        _, my_img = cv2.threshold(my_img, 0.9, 1, cv2.THRESH_BINARY)
 
         tracker = Tracker()
         obj = CCD(tracker, iniertia=0.7, velocity=1, accelaration=3)

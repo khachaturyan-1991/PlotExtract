@@ -24,3 +24,7 @@ __pycache__/*.pyc
 data
 mlruns/
 res_imgs/
+
+
+# public/app
+public/app

@@ -44,7 +44,7 @@ Similar to the data generation step, the mode parameter can be set to either seg
 
 Project Structure
 
-```
+````
 PlotExtract/
 │
 ├── plot_extract.py                # Main script to run the extraction pipeline

@@ -10,7 +10,7 @@
 *.h5
 *.keras
 *.pth
-
+*./text_utils
 # garbege
 *.pyc
 *.csv

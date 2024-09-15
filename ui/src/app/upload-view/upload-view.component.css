@@ -1,0 +1,9 @@
+::ng-deep .p-fileupload-buttonbar {
+    background: None ; 
+    border: none;       
+}
+
+::ng-deep .p-fileupload-content {
+    border: none;
+    background: none;
+}

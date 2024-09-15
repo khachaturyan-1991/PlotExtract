@@ -1,0 +1,10 @@
+<p-toast></p-toast>
+<p-menubar [model]="items">
+  <ng-template pTemplate="start">
+      <img src="assets/images/logo.svg" height="40" class="mr-2" />
+  </ng-template>
+  <ng-template pTemplate="end">
+    <p-button appRemoveFocusBorder  icon="pi pi-cog"  routerLink="/config" [text]="true" [plain]="true"  severity="secondary"></p-button>
+    <p-button appRemoveFocusBorder  icon="pi pi-question-circle" [text]="true" [plain]="true"  severity="secondary" (click)="openHelpPage()"></p-button>
+  </ng-template>
+</p-menubar>

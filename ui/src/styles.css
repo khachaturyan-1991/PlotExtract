@@ -1,1 +1,8 @@
 /* You can add global styles to this file, and also import other style files */
+body {
+    min-height: 98vh;
+    background-image: url('/assets/images/background.svg');
+    background-size: cover; /* Adjusts the background size */
+    background-position: center;
+    background-repeat: no-repeat
+}

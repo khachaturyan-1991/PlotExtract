@@ -7,4 +7,5 @@ import { Component } from '@angular/core';
 })
 export class AppComponent {
   title = 'plot-extractor';
+  version = '0.0.8';
 }

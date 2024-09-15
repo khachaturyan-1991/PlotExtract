@@ -20,7 +20,7 @@ def plots_extract():
     # prepare models
     DEPTH = 3
     unet_model = UNet(depth=DEPTH)
-    unet_model = load_model(unet_model, "./pretrained/segmentation2.pth")
+    unet_model = load_model(unet_model, "./pretrained/segmentation.pth")
     crnn_models = {"x": CNN_LSTM(), "y": CNN_LSTM()}
     for i in "x y".split():
         crnn_models[i] = load_model(crnn_models[i], f"./pretrained/{i}text.pth")

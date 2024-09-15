@@ -39,7 +39,7 @@ class PlotScanner(PlotProcessor):
     def _load_models(self):
         DEPTH = 3
         unet_model = UNet(depth=DEPTH)
-        unet_model = load_model(unet_model, "./pretrained/segmentation2.pth")
+        unet_model = load_model(unet_model, "./pretrained/segmentation.pth")
         crnn_models = {"x": CNN_LSTM(), "y": CNN_LSTM()}
         for i in "x y".split():
             crnn_models[i] = load_model(crnn_models[i], f"./pretrained/{i}text.pth")
@@ -111,3 +111,10 @@ class PlotScanner(PlotProcessor):
         labels_nums = self._get_labels()
         self._set_rescaler(labels_pos, labels_nums)
         self._create_tracker()
+
+
+if __name__ == "__main__":
+    img = cv2.imread("./data/plots/test/image/0.png").astype(np.float32)
+    img = resized_image = cv2.resize(img, (296, 296), interpolation=cv2.INTER_CUBIC)
+    obj = PlotScanner()
+    obj.handle(img)

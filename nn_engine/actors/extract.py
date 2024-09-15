@@ -2,10 +2,10 @@ import numpy as np
 import cv2
 import matplotlib.pylab as plt
 import torch
-from models_zoo.unet import UNet
-from models_zoo.cnn_lstm import CNN_LSTM
-from utils.tracker import Tracker, CCD, RelateCoordinates
-from utils.utils import load_model, embedded_to_number, Rescaler
+from nn_engine.models_zoo.unet import UNet
+from nn_engine.models_zoo.cnn_lstm import CNN_LSTM
+from nn_engine.utils.tracker import Tracker, CCD, RelateCoordinates
+from nn_engine.utils.utilities import load_model, embedded_to_number, Rescaler
 import os
 import matplotlib
 matplotlib.use('Agg')
@@ -25,14 +25,16 @@ def plots_extract():
     for i in "x y".split():
         crnn_models[i] = load_model(crnn_models[i], f"./pretrained/{i}text.pth")
     # get image
-    img = np.load("./data/plots/test/image/0.npy")
+    # img = np.load("./data/plots/test/image/0.npy")
+    img = cv2.imread("./data/plots/test/image/0.png").astype(np.float32)
+    img = np.transpose(img, (2, 0, 1)) / 255.0
     _, img = cv2.threshold(img, 0.9, 1, cv2.THRESH_BINARY)
     plt.imshow(np.transpose(img, (1, 2, 0)))
     plt.savefig(RES_FOLDER + "original.png")
     # segment
     seg_res = img.copy()
     seg_res = np.expand_dims(seg_res, axis=0)
-    seg_res = unet_model(torch.tensor(seg_res)).detach().numpy()
+    seg_res = unet_model(torch.tensor(seg_res, dtype=torch.float32)).detach().numpy()
     _, ax = plt.subplots(1, 2)
     ax[0].imshow(seg_res[0][0])
     ax[0].set_title("Lables")

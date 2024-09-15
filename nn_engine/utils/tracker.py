@@ -256,7 +256,7 @@ if __name__ == "__main__":
 
     from models_zoo.unet import UNet
     from actors.generate_plots import create_dataloader
-    from utils.utils import load_model
+    from nn_engine.utils.utilities import load_model
     # import cv2
 
     LIST_OF_COLOURS = {0: "blue", 1: "lime", 2: "red", 3: "magenta"}

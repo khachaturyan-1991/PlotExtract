@@ -22,6 +22,8 @@ if __name__ == "__main__":
     LR = args.lr
     WEIGHTS = args.weights
     DICE_COEF = args.dice_coef
+    # scan
+    MY_IMG = args.my_img
 
     if ACTION_TYPE == "data":
         if IMG_TYPE == "plots":
@@ -42,5 +44,28 @@ if __name__ == "__main__":
               DEPTH, BATCH_SIZE, LR, WEIGHTS, OUTPUT_FREQUENCY, EPOCHS, NUM_OF_SAMPLES, AXIS)
 
     else:
-        from nn_engine.actors.extract import plots_extract
-        plots_extract()
+        import cv2
+        import numpy as np
+        from nn_engine.actors.extract import PlotScanner
+        import matplotlib.pylab as plt
+        from nn_engine.utils.fitting_zoo import FitExtract
+        img = cv2.imread(MY_IMG).astype(np.float32)
+        img = resized_image = cv2.resize(img, (296, 296), interpolation=cv2.INTER_CUBIC)
+        scanner = PlotScanner()
+        plots = scanner.handle(img)
+
+        _, ax = plt.subplots(1, 2, figsize=(8, 4))
+        ax[0].imshow(img.astype(np.int32))
+        ax[0].axis("off")
+        ax[0].set_title("Input image")
+        fit_machine = FitExtract()
+        for key in plots.keys():
+            plot_i = np.array(plots[key])
+            coefs = fit_machine.fit_on(plot_i)
+            my_f = np.poly1d(coefs)
+            y = [my_f(x) for x in np.linspace(-2, 2, 100)]
+            ax[1].plot(np.linspace(-2, 2, 100), y)
+        ax[1].set_title("Extracted Image")
+        ax[1].set_ylim(-10, 10)
+        ax[1].set_xlim(-2, 2)
+        plt.savefig("tested.png")

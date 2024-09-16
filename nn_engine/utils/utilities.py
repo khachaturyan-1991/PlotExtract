@@ -33,7 +33,7 @@ def parse_arguments():
                         type=str, default="extract",
                         help="Choose between plot extraction (extract), models training (train), or data generation (data)")
     parser.add_argument("--num_of_samples",
-                        type=list, default=[1280, 128, 128],
+                        type=int, nargs='+', default=[1280, 128, 128],
                         help="Choose number of images for [train, validation, test]")
     # data
     parser.add_argument("--img_size",

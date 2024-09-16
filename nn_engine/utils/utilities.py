@@ -89,6 +89,9 @@ def parse_arguments():
                         type=float, default=0.1,
                         help="Dice Loss contribution")
     # extract
+    parser.add_argument("--my_img",
+                        type=str, default="./plot_image.png",
+                        help="pathe to an image with a plot")
     args = parser.parse_args()
     return args
 
@@ -159,7 +162,7 @@ class Rescaler:
         r0 = np.array([labels["x"][-1][0] + labels["x"][0][0],
                        labels["y"][-1][1] + labels["y"][0][1]]) / 2
         delta = np.array([(labels["x"][-1][0] - labels["x"][0][0]) / (nums["x"][1] - nums["x"][0]),
-                          (labels["y"][-1][1] - labels["y"][0][1]) / (nums["y"][1] - nums["y"][0])])
+                          (labels["y"][0][1] - labels["y"][-1][1]) / (nums["y"][1] - nums["y"][0])])
         return r0, delta
 
     def rescale(self, point):

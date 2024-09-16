@@ -9,7 +9,7 @@ Digitalisation if happening in three steps:
     •    Label Extraction: Extracts axis labels from the segmented parts using a CNN-LSTM architecture.
     •    Coordinate Transformation: Extracts plot coordinates in pixel space and rescales them to actual image coordinates using axis information.
 
-=========
+=========\n
 How Does It Work
 
 The extraction process is divided into three main steps:
@@ -26,7 +26,7 @@ To download the project use a command
 To install the necessary dependencies, run:
     pip install -r requirements.txt
 
-=========
+=========\n
 How to use:
 
 A user can extract plots from an image using command:
@@ -54,26 +54,26 @@ PlotExtract/
 │   │    ├──train_unet.py            # train segmentation model
 │   │    ├──train_cnn_lstm.py        # train model to extract numbers from labels
 │   │    └──__init__.py
-|    |
+│   │
 │   ├──metrics_zoo
-|    |    └──losses.py                # collection of loss funcitons
-|    |
+│   │    └──losses.py                # collection of loss funcitons
+│   │
 │   ├──models_zoo                    # deep neural models to perform
 │   │    ├──unet.py                    # segmentations
 │   │    ├──cnn_lstm.py                # extract numbers from labels
 │   │    └──__init__.py
-|    |
+│   │
 │   ├──train                        # train pipe-lines to train
 │   │    ├──train_unet.py            # segmentation model
 │   │    ├──train_cnn_lstm.py        # text extraction model
 │   │    └──__init__.py
-|    |
+│   │
 │   ├──utils                        # utilities
 │   │    ├──tracking.py                # separate segmented lines from one another
 │   │    ├──fitting_zoo.py            # allows fiting separated lines
 │   │    ├──utilities.py                # heler functions
 │   │    └──__init__.py
-|    |
+│   │
 │   ├──__init__.py
 │   └──__main__.py                    # main funciton that is executed when the packedge is called
 |

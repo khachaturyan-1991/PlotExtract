@@ -4,20 +4,16 @@ from scipy.optimize import curve_fit
 
 class FitExtract():
 
-    def __init__(self) -> None:
-        pass
+    def __init__(self, func=None) -> None:
+        self.func = func if func else self.poly3
 
-    def my_func(self, x, a11, a12, a13):
+    def poly3(self, x, a11, a12, a13):
         y1 = np.poly1d([a11, a12, a13])
         return y1(x)
 
-    def fit(self, coords, bnds):
-        x, y = coords[:, 0], coords[:, 1]
-        coefficients, _ = curve_fit(self.my_func, x, y, bounds=bnds)
-        return coefficients
-
-    def fit_on(self, plot, bounds: list = [(-8, -8, -8), (8, 8, 8)]):
-        coefs = self.fit(plot, bounds)
+    def fit_on(self, plot, bnds: list = [(-8, -8, -8), (8, 8, 8)]):
+        x, y = plot[:, 0], plot[:, 1]
+        coefs, _ = curve_fit(self.func, x, y, bounds=bnds)
         return coefs
 
 

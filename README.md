@@ -30,7 +30,7 @@ To install the necessary dependencies, run:
 How to use:
 
 A user can extract plots from an image using command:
-    python -m plot_extract --path_to_image ./example_plot.png
+    python -m plot_extract --my_img ./example_plot.png
 assuming that models were trained and weights were saved in a folder pertained (in a same directory as the nn_engine). Weights names are segmentation.pth, labels_x.pth, and labesl_y.pth.
 
 In addition to its core functionality, PlotExtract also provides tools for training and fine-tuning the underlying neural network models. This allows users to customise and improve the performance of both the segmentation model and the label extraction model based on their specific dataset.

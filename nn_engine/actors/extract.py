@@ -7,6 +7,7 @@ from nn_engine.models_zoo.unet import UNet
 from nn_engine.models_zoo.cnn_lstm import CNN_LSTM
 from nn_engine.utils.tracker import Tracker, CCD, RelateCoordinates
 from nn_engine.utils.utilities import load_model, embedded_to_number, Rescaler
+from nn_engine.utils.fitting_zoo import FitExtract
 from plot_gear.plot_processor import PlotProcessor
 import matplotlib
 matplotlib.use('Agg')
@@ -68,9 +69,16 @@ class PlotScanner(PlotProcessor):
         square = self.segmented[0][0].copy()
         label_extractor = RelateCoordinates(square)
         extracted_axes = label_extractor.get_uniform_positions()
+        plt.figure()
         plt.imshow(np.transpose(self.img, (1, 2, 0)))
         for i in "x y".split():
             plt.scatter(extracted_axes[i][..., 0], extracted_axes[i][..., 1])
+        plt.text(150., 50, "Y-range: [-10; 10], X-range: [-2, 2]",
+                 size=10, rotation=0.,
+                 ha="center", va="top",
+                 bbox=dict(boxstyle="round",
+                           ec=(1., 0.5, 0.5),
+                           fc=(1., 0.8, 0.8)))
         plt.savefig(self.RES_FOLDER + "labels_positions_marked.png")
         return extracted_axes
 
@@ -131,6 +139,35 @@ class PlotScanner(PlotProcessor):
         self._set_rescaler(labels_pos, labels_nums)
         extracted_plots = self._create_tracker()
         return extracted_plots
+
+    def final_out(self, img, img_name: str = "result.png"):
+        plots = self.handle(img)
+        _, ax = plt.subplots(1, 2, figsize=(8, 4))
+        ax[0].imshow(img.astype(np.int32))
+        ax[0].set_title("Input image")
+        fit_machine = FitExtract()
+        ax[1].text(0., 5 + 2, "Extracted coefficients:",
+                   size=10, rotation=0.,
+                   ha="center", va="top",
+                   bbox=dict(boxstyle="round",
+                             ec=(1., 0.5, 0.5),
+                             fc=(1., 0.8, 0.8)))
+        for key in plots.keys():
+            plot_i = np.array(plots[key])
+            coefs = fit_machine.fit_on(plot_i)
+            my_f = np.poly1d(coefs)
+            y = [my_f(x) for x in np.linspace(-2, 2, 100)]
+            ax[1].plot(np.linspace(-2, 2, 100), y)
+            ax[1].text(0., 5 - 2 * key, f"Plot {key + 1}   a1 = {coefs[0].round(1)}; a2 = {coefs[1].round(1)}; a3 = {coefs[2].round(1)}",
+                       size=10, rotation=0.,
+                       ha="center", va="top",
+                       bbox=dict(boxstyle="round",
+                                 ec=(1., 0.5, 0.5),
+                                 fc=(1., 0.8, 0.8),))
+        ax[1].set_title("Extracted Image")
+        ax[1].set_ylim(-10, 10)
+        ax[1].set_xlim(-2, 2)
+        plt.savefig(img_name)
 
 
 if __name__ == "__main__":

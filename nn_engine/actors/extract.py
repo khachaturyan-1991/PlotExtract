@@ -42,7 +42,7 @@ class PlotScanner(PlotProcessor):
         """loads weights to the modesl"""
         DEPTH = 3
         unet_model = UNet(depth=DEPTH)
-        unet_model = load_model(unet_model, "./pretrained/segmentation.pth")
+        unet_model = load_model(unet_model, "./pretrained/segmentation_bw.pth")
         crnn_models = {"x": CNN_LSTM(), "y": CNN_LSTM()}
         for i in "x y".split():
             crnn_models[i] = load_model(crnn_models[i], f"./pretrained/{i}text.pth")
@@ -89,9 +89,9 @@ class PlotScanner(PlotProcessor):
         for i in "x y".split():
             a, b = crops_lim[i]
             if i == "x":
-                label_croped = self.img[1][a:b, :].copy()
+                label_croped = self.img[0][a:b, :].copy()
             else:
-                label_croped = self.img[1][:, a:b].copy()
+                label_croped = self.img[0][:, a:b].copy()
             label_croped = np.expand_dims(label_croped, axis=0)
             label_croped = np.expand_dims(label_croped, axis=0)
             text_res = self.models[f"label_{i}"](torch.tensor(label_croped))

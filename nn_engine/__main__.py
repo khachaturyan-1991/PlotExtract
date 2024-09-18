@@ -48,6 +48,8 @@ if __name__ == "__main__":
         import numpy as np
         from nn_engine.actors.extract import PlotScanner
         img = cv2.imread(MY_IMG).astype(np.float32)
-        img = resized_image = cv2.resize(img, (296, 296), interpolation=cv2.INTER_CUBIC)
+        img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+        img = cv2.resize(img, (296, 296), interpolation=cv2.INTER_CUBIC)
+        img = np.expand_dims(img, axis=2)
         scanner = PlotScanner()
         scanner.final_out(img)

@@ -84,7 +84,7 @@ class UNet(nn.Module):
         self.depth = depth
         # encoder
         self.down_blocks = nn.ModuleDict()
-        self.down_blocks[str(0)] = DownBlock(3, 64)
+        self.down_blocks[str(0)] = DownBlock(1, 64)
         n_feat = 64
         for i in range(1, depth):
             self.down_blocks[str(i)] = DownBlock(n_feat, 2 * n_feat)

@@ -1,5 +1,4 @@
-from utils.utils import parse_arguments
-
+from nn_engine.utils.utilities import parse_arguments
 
 if __name__ == "__main__":
 
@@ -23,12 +22,14 @@ if __name__ == "__main__":
     LR = args.lr
     WEIGHTS = args.weights
     DICE_COEF = args.dice_coef
+    # scan
+    MY_IMG = args.my_img
 
     if ACTION_TYPE == "data":
         if IMG_TYPE == "plots":
-            from actors.generate_plots import generate_data
+            from nn_engine.actors.generate_plots import generate_data
         elif IMG_TYPE == "labels":
-            from actors.generate_labels import generate_data
+            from nn_engine.actors.generate_labels import generate_data
         print(f"Starting {IMG_TYPE} generation")
         generate_data(mode="train", num_samples=NUM_OF_SAMPLES[0], img_size=IMG_SIZE, fig_size=FIG_SIZE, dpi=DPI, )
         generate_data(mode="validation", num_samples=NUM_OF_SAMPLES[1], img_size=IMG_SIZE, fig_size=FIG_SIZE, dpi=DPI)
@@ -36,12 +37,17 @@ if __name__ == "__main__":
 
     elif ACTION_TYPE == "train":
         if IMG_TYPE == "plots":
-            from actors.train_unet import train
+            from nn_engine.actors.train_unet import train
         elif IMG_TYPE == "labels":
-            from actors.train_cnn_lstm import train
+            from nn_engine.actors.train_cnn_lstm import train
         train(RUN_DESCRIPTION, DICE_COEF, DEVICE, EXPERIMENT_NAME, IMG_SIZE, FIG_SIZE,
               DEPTH, BATCH_SIZE, LR, WEIGHTS, OUTPUT_FREQUENCY, EPOCHS, NUM_OF_SAMPLES, AXIS)
 
     else:
-        from actors.extract import plots_extract
-        plots_extract()
+        import cv2
+        import numpy as np
+        from nn_engine.actors.extract import PlotScanner
+        img = cv2.imread(MY_IMG).astype(np.float32)
+        img = resized_image = cv2.resize(img, (296, 296), interpolation=cv2.INTER_CUBIC)
+        scanner = PlotScanner()
+        scanner.final_out(img)

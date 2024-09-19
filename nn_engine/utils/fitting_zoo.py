@@ -4,30 +4,16 @@ from scipy.optimize import curve_fit
 
 class FitExtract():
 
-    def __init__(self) -> None:
-        pass
+    def __init__(self, func=None) -> None:
+        self.func = func if func else self.poly3
 
-    def rescale(self, dictx):
-        rescaled = {}
-        for key in dictx:
-            new_key = (key - 66) / 24
-            rescaled[new_key] = ((-1) * dictx[key] + 61) / 4
-        return rescaled
-
-    def my_func(self, x, a11, a12, a13):
+    def poly3(self, x, a11, a12, a13):
         y1 = np.poly1d([a11, a12, a13])
         return y1(x)
 
-    def fit(self, t_rescaled):
-        x_values = np.array(list(t_rescaled.keys()))
-        y_values = np.array(list(t_rescaled.values()))
-        bnds = [(-8, -8, -8), (8, 8, 8)]
-        coefficients, _ = curve_fit(self.my_func, x_values, y_values, bounds=bnds)
-        return coefficients
-
-    def fit_on(self, plot):
-        t_rescaled = self.rescale(plot)
-        coefs = self.fit(t_rescaled)
+    def fit_on(self, plot, bnds: list = [(-8, -8, -8), (8, 8, 8)]):
+        x, y = plot[:, 0], plot[:, 1]
+        coefs, _ = curve_fit(self.func, x, y, bounds=bnds)
         return coefs
 
 
@@ -35,8 +21,8 @@ if __name__ == "__main__":
 
     import matplotlib.pylab as plt
     from models_zoo.unet import UNet
-    from data.data import create_dataloader
-    from utils.utils import load_model
+    from nn_engine.data.loader import create_plots_loader
+    from nn_engine.utils.utilities import load_model
     from utils.tracker import CCD, Tracker
 
     fit_machine = FitExtract()
@@ -44,8 +30,8 @@ if __name__ == "__main__":
     LIST_OF_COLOURS = {0: "blue", 1: "lime", 2: "red", 3: "magenta"}
     BATCH_SIZE = 32
     model = UNet()
-    model = load_model(model, "./weights/08-09-07-16.pth")
-    test_dataloader = create_dataloader(mode="test", num_samples=128, batch_size=BATCH_SIZE, shuffle=False, img_size=128)
+    model = load_model(model, "./pretrained/segmentation.pth")
+    test_dataloader = create_plots_loader(mode="test", num_samples=128, batch_size=BATCH_SIZE, shuffle=False, img_size=128)
     img, mask = next(iter(test_dataloader))
 
     pred = model(img).detach().numpy()

@@ -7,7 +7,8 @@ import { ConfigViewComponent } from './config-view/config-view.component';
 const routes: Routes = [
   {path: 'upload', component: UploadViewComponent},
   {path: 'chart', component: ChartViewComponent},
-  {path: 'config', component: ConfigViewComponent}
+  {path: 'config', component: ConfigViewComponent},
+  {path: '', pathMatch: 'full', redirectTo: 'upload'}
 ];
 
 @NgModule({

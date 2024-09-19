@@ -7,6 +7,10 @@
   #content-wrap {
     padding-bottom: 2.5rem;    /* Footer height */
   }
+
+  #content {
+    height: 93vh; 
+  }
   
   #footer {
     position: absolute;

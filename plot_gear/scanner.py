@@ -8,10 +8,11 @@ from nn_engine.models_zoo.cnn_lstm import CNN_LSTM
 from nn_engine.utils.tracker import Tracker, CCD, RelateCoordinates
 from nn_engine.utils.utilities import load_model, embedded_to_number, Rescaler
 from plot_gear.plot_processor import PlotProcessor
+from lib.injector import singleton
 import matplotlib
 matplotlib.use('Agg')
 
-
+@singleton
 class PlotScanner(PlotProcessor):
 
     def __init__(self) -> None:

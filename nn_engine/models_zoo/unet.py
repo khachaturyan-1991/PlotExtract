@@ -1,6 +1,6 @@
 from torch.functional import F
 from torch import nn
-from torchinfo import summary
+# from torchinfo import summary
 
 
 CONV_KERNEL = (3, 3)

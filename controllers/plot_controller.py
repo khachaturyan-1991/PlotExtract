@@ -15,7 +15,7 @@ from services.plot_service import PlotService
 
 logger = logging.getLogger(__name__)
 
-UPLOAD_FOLDER = 'uploads'
+UPLOAD_FOLDER = 'temp/uploads'
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
 
 @singleton

@@ -7,7 +7,6 @@ import { NavMenuComponent } from './nav-menu/nav-menu.component';
 import { HttpClient, HttpClientModule } from '@angular/common/http';
 import { appInitializerFactory, createTranslateLoader } from './util/translation.functions';
 import { ConfirmationService, MessageService, PrimeNGConfig } from 'primeng/api';
-import { StateService } from './_service/state.service';
 import { ButtonModule } from 'primeng/button';
 import { MenubarModule } from 'primeng/menubar';
 import { ToastModule } from 'primeng/toast';
@@ -18,6 +17,7 @@ import { BadgeModule } from 'primeng/badge';
 import { FileUploadModule } from 'primeng/fileupload';
 import { ConfigViewComponent } from './config-view/config-view.component';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+import { PlotService } from './_service/plot.service';
 
 @NgModule({
   declarations: [
@@ -52,10 +52,11 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
     MessageService,
     ConfirmationService,
     PrimeNGConfig,
+    PlotService,
     {
       provide: APP_INITIALIZER,
       useFactory: appInitializerFactory,
-      deps: [TranslateService, Injector, StateService],
+      deps: [TranslateService, Injector],
       multi: true
     }],
   bootstrap: [AppComponent]

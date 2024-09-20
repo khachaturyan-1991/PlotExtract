@@ -32,6 +32,12 @@ export class UploadViewComponent {
   }
 
   onTemplatedUpload() {
+    this.files.forEach(file => {
+        const formData = new FormData();
+        formData.append('file', file);
+        // Make sure to handle the file upload properly here
+      });
+      
       this.messageService.add({ severity: 'info', summary: 'Success', detail: 'File Uploaded', life: 3000 });
   }
 

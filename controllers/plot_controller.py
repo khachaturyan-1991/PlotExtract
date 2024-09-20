@@ -53,8 +53,8 @@ class PlotController(Controller):
             filename = secure_filename(file.filename)
             file_path = os.path.join(UPLOAD_FOLDER, filename)
             file.save(file_path)
-            self._plot_service.extract_plot(file_path)
-            return jsonify({'message': 'File successfully uploaded'}), 201
+            result = self._plot_service.extract_plot(file_path)
+            return jsonify({'message': 'File successfully uploaded', 'result': result}), 201
         
         return jsonify({'error': 'File type not allowed'}), 400
     

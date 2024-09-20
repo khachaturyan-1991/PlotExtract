@@ -110,7 +110,7 @@ class PlotScanner(PlotProcessor):
             extracted_plots = np.array(trace[key])
             res = self.rescaler.rescale(extracted_plots)
             ax[1].plot(res[:, 0], res[:, 1])
-            trace[key] = res
+            trace[key] = res.tolist()
         ax[1].set_xlim(-2.2, 2.2)
         ax[1].set_ylim(-10.2, 10.2)
         plt.savefig(self.RES_FOLDER + "final.png")

@@ -1,5 +1,7 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { MessageService, PrimeNGConfig } from 'primeng/api';
+import { PlotService } from '../_service/plot.service';
+import { TranslateService } from '@ngx-translate/core';
 
 @Component({
   selector: 'app-upload-view',
@@ -7,63 +9,61 @@ import { MessageService, PrimeNGConfig } from 'primeng/api';
   styleUrl: './upload-view.component.css'
 })
 export class UploadViewComponent {
-  files = [];
+    private messageService: MessageService = inject(MessageService);
+    private translateService: TranslateService = inject(TranslateService);
+    private plotService: PlotService = inject(PlotService);
 
-  totalSize : number = 0;
+    files = [];
 
-  totalSizePercent : number = 0;
+    totalSize : number = 0;
 
-  constructor(private config: PrimeNGConfig, private messageService: MessageService) {}
+    totalSizePercent : number = 0;
 
-  choose(event, callback) {
-      callback();
-  }
+    maxSize : number = 1000000;
 
-  onRemoveTemplatingFile(event, file, removeFileCallback, index) {
-      removeFileCallback(event, index);
-      this.totalSize -= parseInt(this.formatSize(file.size));
-      this.totalSizePercent = this.totalSize / 10;
-  }
+    choose(event, callback) {
+        callback();
+    }
 
-  onClearTemplatingUpload(clear) {
-      clear();
-      this.totalSize = 0;
-      this.totalSizePercent = 0;
-  }
+    onRemoveTemplatingFile(event, file, removeFileCallback, index) {
+        removeFileCallback(event, index);
+        this.totalSize -= parseInt(this.formatSize(file.size));
+        this.totalSizePercent = this.totalSize / 10;
+    }
 
-  onTemplatedUpload() {
-    this.files.forEach(file => {
-        const formData = new FormData();
-        formData.append('file', file);
-        // Make sure to handle the file upload properly here
-      });
-      
-      this.messageService.add({ severity: 'info', summary: 'Success', detail: 'File Uploaded', life: 3000 });
-  }
+    
+    onSelectedFiles(event) {
+        this.files = event.currentFiles;
+        this.totalSize = 0;
+        this.files.forEach((file) => {
+            this.totalSize += file.size;
+        });
+        this.totalSizePercent = (this.totalSize / this.maxSize) * 100;
+    }
 
-  onSelectedFiles(event) {
-      this.files = event.currentFiles;
-      this.files.forEach((file) => {
-          this.totalSize += parseInt(this.formatSize(file.size));
-      });
-      this.totalSizePercent = this.totalSize / 10;
-  }
+    uploadFiles() {
+        if (this.files.length === 0) {
+        this.messageService.add({ severity: 'warn', summary: 'NO_FILES_SELECTED', detail: 'PLEASE_SELECT_FILES_TO_UPLOAD', life: 3000 });
+        return;
+        }
 
-  uploadEvent(callback) {
-      callback();
-  }
+        this.files.forEach(file => {
+            this.plotService.uploadFile(file).subscribe({
+                next: (response) => {
+                    this.messageService.add({ severity: 'success', summary: this.translateService.instant('UPLOAD_SUCCESS'), detail: `${this.translateService.instant('FILE_UPLOADED_SUCCESSFULLY')}: ${file.name}`, life: 3000 });
+                },
+                error: (error) => {
+                    this.messageService.add({ severity: 'error', summary: this.translateService.instant('UPLOAD_FAILED'), detail: `${this.translateService.instant('FAILED_TO_UPLOAD')} ${file.name}: ${error.message}`, life: 3000 });
+                }
+            });
+        });
+    }
 
-  formatSize(bytes) {
-      const k = 1024;
-      const dm = 3;
-      const sizes = this.config.translation.fileSizeTypes;
-      if (bytes === 0) {
-          return `0 ${sizes[0]}`;
-      }
-
-      const i = Math.floor(Math.log(bytes) / Math.log(k));
-      const formattedSize = parseFloat((bytes / Math.pow(k, i)).toFixed(dm));
-
-      return `${formattedSize} ${sizes[i]}`;
-  }
+    formatSize(bytes) {
+        const k = 1024;
+        const dm = 2;
+        const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
+        const i = Math.floor(Math.log(bytes) / Math.log(k));
+        return `${parseFloat((bytes / Math.pow(k, i)).toFixed(dm))} ${sizes[i]}`;
+    }
 }

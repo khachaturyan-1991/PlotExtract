@@ -1,5 +1,19 @@
 {
   "LANGUAGE": "Language",
   "CHART": "Chart",
-  "UPLOAD": "Upload"
+  "UPLOAD": "Upload",
+  "START": "Start",
+  "END": "End",
+  "NUMBER_OF_STEPS": "Number of Steps",
+  "NO_INTEGRATED_HELP": "No Help Integrated",
+  "HELP_DOES_NOT_EXIST": "Help does not exist in this version",
+  "DRAG_AND_DROP_TO_UPLOAD": "Drag & Drop to Upload",
+  "COMPLETE": "Complete",
+  "PENDING": "Pending",
+  "NO_FILES_SELECTED": "No files selected",
+  "PLEASE_SELECT_FILES_TO_UPLOAD": "Please select files to upload",
+  "UPLOAD_SUCCESS": "Upload Success",
+  "FILE_UPLOADED_SUCCESSFULLY": "File uploaded successfully",
+  "UPLOAD_FAILED": "Upload Failed",
+  "FAILED_TO_UPLOAD": "Failed to upload"
 }

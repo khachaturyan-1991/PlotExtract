@@ -1,52 +1,92 @@
-import { Component, inject } from '@angular/core';
+import { Component, effect, inject, OnInit, signal } from '@angular/core';
 import { PlotService } from '../_service/plot.service';
 import { MessageService } from 'primeng/api';
+import { ActivatedRoute } from '@angular/router';
 
 @Component({
   selector: 'app-chart-view',
   templateUrl: './chart-view.component.html',
-  styleUrl: './chart-view.component.css'
+  styleUrls: ['./chart-view.component.css']
 })
-export class ChartViewComponent {
+export class ChartViewComponent implements OnInit {
     private messageService: MessageService = inject(MessageService);
     private plotService: PlotService = inject(PlotService);
-    
+    private route: ActivatedRoute = inject(ActivatedRoute);
+
     data: any;
-
     options: any;
+    start = signal(0);
+    end = signal(9);
+    steps = signal(10);
+    coefficientsArray: number[][];
 
-    ngOnInit() {
-        this.dummyGraph();
-        this.test();
+    constructor(){       
+        effect(() => {
+            const labels = this.generateLabels(this.start(), this.end(), this.steps());
+            this.generateGraph(labels);
+        });
+
     }
 
-    test(){
-        this.plotService.test().subscribe();
+    ngOnInit(){
+        const labels = this.generateLabels(this.start(), this.end(), this.steps());
+        this.coefficientsArray = this.plotService.getPlots();
+        this.generateGraph(labels);
     }
-    dummyGraph(){
+
+
+    limitSteps(){
+        if (this.steps()>100) {
+            this.steps.set(100);
+        }
+    }
+
+    roundNumber(number: number , nearest: number){
+        return Math.round(number * nearest) / nearest;
+    }
+
+    generateLabels(start: number, end: number, numPoints: number): number[] {
+        numPoints = (Math.min(numPoints ,100));
+        const step = (end - start) / (numPoints - 1);
+        return Array.from({ length: numPoints }, (_, i) => this.roundNumber((start + i * step), 100));
+    }
+
+    getDatasets(coefficientsArray: number[][], labels: number[]){
+        return coefficientsArray.map((coefficients, index) => ({
+            label: `Plot ${index + 1}`,
+            data: this.generateYValues(coefficients, labels),
+            fill: false,
+            borderColor: this.getRandomColor(index), 
+            tension: 0.4
+        }));
+    }
+
+    generateYValues(coefficients: number[], xValues: number[]): number[] {
+        return xValues.map(x => {
+            // Calculate y = a*x^n + b*x^(n-1) + ... + c
+            return coefficients.reduce((acc, coef, idx) => acc + coef * Math.pow(x, coefficients.length - 1 - idx), 0);
+        });
+    }
+
+    getRandomColor(index: number): string {
+        const colors = ['--blue-500', '--pink-500', '--green-500', '--orange-500', '--yellow-500'];
+        const documentStyle = getComputedStyle(document.documentElement);
+        return documentStyle.getPropertyValue(colors[index % colors.length]);
+    }
+
+    generateGraph(labels: number[]) {
+        if (!this.coefficientsArray) return;
+
         const documentStyle = getComputedStyle(document.documentElement);
         const textColor = documentStyle.getPropertyValue('--text-color');
         const textColorSecondary = documentStyle.getPropertyValue('--text-color-secondary');
         const surfaceBorder = documentStyle.getPropertyValue('--surface-border');
 
+        const datasets = this.getDatasets(this.coefficientsArray, labels);
+
         this.data = {
-            labels: ['January', 'February', 'March', 'April', 'May', 'June', 'July'],
-            datasets: [
-                {
-                    label: 'First Dataset',
-                    data: [65, 59, 80, 81, 56, 55, 40],
-                    fill: false,
-                    borderColor: documentStyle.getPropertyValue('--blue-500'),
-                    tension: 0.4
-                },
-                {
-                    label: 'Second Dataset',
-                    data: [28, 48, 40, 19, 86, 27, 90],
-                    fill: false,
-                    borderColor: documentStyle.getPropertyValue('--pink-500'),
-                    tension: 0.4
-                }
-            ]
+            labels,
+            datasets
         };
 
         this.options = {

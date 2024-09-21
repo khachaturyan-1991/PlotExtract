@@ -1,0 +1,15 @@
+<div class="flag-dropdown">
+    <button (click)="toggleDropdown()" class="flag-button">
+      <img [src]="selectedFlag" alt="Selected Flag" class="flag-icon" />
+    </button>
+  
+    <div *ngIf="dropdownOpen" class="dropdown-menu">
+      <div class="flag-option" (click)="selectFlag('de')">
+        <img src="assets/images/flags/flag_de.svg" alt="German Flag" class="flag-icon" />
+      </div>
+      <div class="flag-option" (click)="selectFlag('en')">
+        <img src="assets/images/flags/flag_en.svg" alt="English Flag" class="flag-icon" />
+      </div>
+    </div>
+  </div>
+  

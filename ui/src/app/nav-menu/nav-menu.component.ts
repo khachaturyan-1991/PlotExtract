@@ -16,12 +16,20 @@ export class NavMenuComponent {
   private translateService: TranslateService = inject(TranslateService);
 
   ngOnInit() {
-      this.items = [
-          {label: this.translateService.instant('UPLOAD'), icon: 'pi pi-upload', routerLink: ['/upload']},
-          {label: this.translateService.instant('CHART'), icon: 'pi pi-chart-line', routerLink: ['/chart']}
-      ];
-
+      this.loaditems();
+      
+      this.translateService.onLangChange.subscribe(() => {
+        this.loaditems();
+      });
+      
       this.activeItem = this.items[1];
+  }
+
+  loaditems(){
+    this.items = [
+      {label: this.translateService.instant('UPLOAD'), icon: 'pi pi-upload', routerLink: ['/upload']},
+      {label: this.translateService.instant('CHART'), icon: 'pi pi-chart-line', routerLink: ['/chart']}
+    ];
   }
 
   openHelpPage(){

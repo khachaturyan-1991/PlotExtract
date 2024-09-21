@@ -1,5 +1,19 @@
 {
   "LANGUAGE": "Sprache",
   "CHART": "Diagramm",
-  "UPLOAD": "Hochladen"
+  "UPLOAD": "Hochladen",
+  "START": "Start",
+  "END": "Ende",
+  "NUMBER_OF_STEPS": "Anzahl der Schritte",
+  "NO_INTEGRATED_HELP": "Keine Hilfe integriert",
+  "HELP_DOES_NOT_EXIST": "Hilfe existiert in der Version nicht",
+  "DRAG_AND_DROP_TO_UPLOAD": "Hochladen per Drag & Drop",
+  "COMPLETE": "Abgeschlossen",
+  "PENDING": "Ausstehend",
+  "NO_FILES_SELECTED": "Keine Dateien ausgewählt",
+  "PLEASE_SELECT_FILES_TO_UPLOAD": "Bitte wählen Sie Dateien zum Hochladen aus",
+  "UPLOAD_SUCCESS": "Upload erfolgreich",
+  "FILE_UPLOADED_SUCCESSFULLY": "Datei erfolgreich hochgeladen",
+  "UPLOAD_FAILED": "Upload fehlgeschlagen",
+  "FAILED_TO_UPLOAD": "Fehler beim Hochladen"
 }

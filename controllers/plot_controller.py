@@ -41,10 +41,10 @@ class PlotController(Controller):
         """
         Endpoint for uploading an image file
         """
-        if 'file[]' not in request.files:
+        if 'file' not in request.files:
             return jsonify({'error': 'No file part'}), 400
         
-        file = request.files['file[]']
+        file = request.files['file']
         
         if file.filename == '':
             return jsonify({'error': 'No selected file'}), 400
@@ -54,7 +54,11 @@ class PlotController(Controller):
             file_path = os.path.join(UPLOAD_FOLDER, filename)
             file.save(file_path)
             result = self._plot_service.extract_plot(file_path)
-            return jsonify({'message': 'File successfully uploaded', 'result': result}), 201
+            return jsonify({
+                'message': 'SUCCESS', 
+                'result': True, 
+                'detail': result 
+            }), 201
         
         return jsonify({'error': 'File type not allowed'}), 400
     

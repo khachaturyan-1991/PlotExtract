@@ -1,3 +1,30 @@
+<div class="flex justify-content-center">
+    <div class="field m-3">
+        <label class="text-base text-color" for="from">{{'START' | translate}}</label><br>
+        <p-inputNumber 
+            inputId="start" 
+            [(ngModel)]="start" /> 
+    </div>
+    
+    <div class="field m-3">
+        <label class="text-base text-color" for="end">{{'END' | translate}}</label><br>
+        <p-inputNumber 
+            inputId="end" 
+            inputId="integeronly" 
+            [(ngModel)]="end" /> 
+    </div>
+
+    <div class="field m-3">
+        <label class="text-base text-color" for="steps">{{'NUMBER_OF_STEPS' | translate}}</label><br>
+        <p-inputNumber 
+            inputId="steps"
+            inputId="integeronly" 
+            [max]="100"
+            (onInput)="limitSteps()"
+            [(ngModel)]="steps" />     
+    </div>
+</div>
+
 <div class="m-4 p-4">
     
     <p-chart type="line" [data]="data" [options]="options" />

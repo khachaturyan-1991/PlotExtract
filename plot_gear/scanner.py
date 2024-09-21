@@ -7,6 +7,7 @@ from nn_engine.models_zoo.unet import UNet
 from nn_engine.models_zoo.cnn_lstm import CNN_LSTM
 from nn_engine.utils.tracker import Tracker, CCD, RelateCoordinates
 from nn_engine.utils.utilities import load_model, embedded_to_number, Rescaler
+from nn_engine.utils.fitting_zoo import FitExtract
 from plot_gear.plot_processor import PlotProcessor
 from lib.injector import singleton
 import matplotlib
@@ -69,9 +70,16 @@ class PlotScanner(PlotProcessor):
         square = self.segmented[0][0].copy()
         label_extractor = RelateCoordinates(square)
         extracted_axes = label_extractor.get_uniform_positions()
+        plt.figure()
         plt.imshow(np.transpose(self.img, (1, 2, 0)))
         for i in "x y".split():
             plt.scatter(extracted_axes[i][..., 0], extracted_axes[i][..., 1])
+        plt.text(150., 50, "Y-range: [-10; 10], X-range: [-2, 2]",
+                 size=10, rotation=0.,
+                 ha="center", va="top",
+                 bbox=dict(boxstyle="round",
+                           ec=(1., 0.5, 0.5),
+                           fc=(1., 0.8, 0.8)))
         plt.savefig(self.RES_FOLDER + "labels_positions_marked.png")
         return extracted_axes
 
@@ -110,7 +118,7 @@ class PlotScanner(PlotProcessor):
             extracted_plots = np.array(trace[key])
             res = self.rescaler.rescale(extracted_plots)
             ax[1].plot(res[:, 0], res[:, 1])
-            trace[key] = res.tolist()
+            trace[key] = res
         ax[1].set_xlim(-2.2, 2.2)
         ax[1].set_ylim(-10.2, 10.2)
         plt.savefig(self.RES_FOLDER + "final.png")
@@ -131,11 +139,19 @@ class PlotScanner(PlotProcessor):
         labels_nums = self._get_labels()
         self._set_rescaler(labels_pos, labels_nums)
         extracted_plots = self._create_tracker()
-        return extracted_plots
+        fit_machine = FitExtract()
+        coeficients = []
+        _, ax = plt.subplots(1, 2)
+        for key in extracted_plots.keys():
+            plot_i = np.array(extracted_plots[key])
+            coefs = fit_machine.fit_on(plot_i)
+            coeficients.append(coefs.tolist())
+        return coeficients
 
 
 if __name__ == "__main__":
     img = cv2.imread("./data/plots/test/image/0.png").astype(np.float32)
     img = resized_image = cv2.resize(img, (296, 296), interpolation=cv2.INTER_CUBIC)
     obj = PlotScanner()
-    obj.handle(img)
+    res = obj.handle(img)
+    print(res)

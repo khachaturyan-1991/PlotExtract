@@ -40,6 +40,8 @@ export class UploadViewComponent {
             this.totalSize += file.size;
         });
         this.totalSizePercent = (this.totalSize / this.maxSize) * 100;
+
+        this.uploadFiles();
     }
 
     uploadFiles() {

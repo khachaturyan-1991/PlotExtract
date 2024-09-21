@@ -21,7 +21,7 @@ import { FileUploadModule } from 'primeng/fileupload';
 import { ConfigViewComponent } from './config-view/config-view.component';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { PlotService } from './_service/plot.service';
-import { LanguageSelectorComponent } from './language-selector/language-selector.component';
+import { LanguageSelectorComponent } from './nav-menu/language-selector/language-selector.component';
 
 @NgModule({
   declarations: [

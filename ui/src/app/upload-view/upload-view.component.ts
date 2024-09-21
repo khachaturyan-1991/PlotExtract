@@ -2,7 +2,7 @@ import { Component, inject } from '@angular/core';
 import { MessageService, PrimeNGConfig } from 'primeng/api';
 import { PlotService } from '../_service/plot.service';
 import { TranslateService } from '@ngx-translate/core';
-
+import { Router } from '@angular/router';
 @Component({
   selector: 'app-upload-view',
   templateUrl: './upload-view.component.html',
@@ -12,6 +12,7 @@ export class UploadViewComponent {
     private messageService: MessageService = inject(MessageService);
     private translateService: TranslateService = inject(TranslateService);
     private plotService: PlotService = inject(PlotService);
+    private router: Router = inject(Router);
 
     files = [];
 
@@ -51,6 +52,7 @@ export class UploadViewComponent {
             this.plotService.uploadFile(file).subscribe({
                 next: (response) => {
                     this.messageService.add({ severity: 'success', summary: this.translateService.instant('UPLOAD_SUCCESS'), detail: `${this.translateService.instant('FILE_UPLOADED_SUCCESSFULLY')}: ${file.name}`, life: 3000 });
+                    this.router.navigate(['/chart']);
                 },
                 error: (error) => {
                     this.messageService.add({ severity: 'error', summary: this.translateService.instant('UPLOAD_FAILED'), detail: `${this.translateService.instant('FAILED_TO_UPLOAD')} ${file.name}: ${error.message}`, life: 3000 });

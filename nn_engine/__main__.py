@@ -31,23 +31,26 @@ if __name__ == "__main__":
         elif IMG_TYPE == "labels":
             from nn_engine.actors.generate_labels import generate_data
         print(f"Starting {IMG_TYPE} generation")
-        generate_data(mode="train", num_samples=NUM_OF_SAMPLES[0], img_size=IMG_SIZE, fig_size=FIG_SIZE, dpi=DPI, )
-        generate_data(mode="validation", num_samples=NUM_OF_SAMPLES[1], img_size=IMG_SIZE, fig_size=FIG_SIZE, dpi=DPI)
-        generate_data(mode="test", num_samples=NUM_OF_SAMPLES[2], img_size=IMG_SIZE, fig_size=FIG_SIZE, dpi=DPI)
+        generate_data(mode="train", num_samples=NUM_OF_SAMPLES[0],
+                      img_size=IMG_SIZE, fig_size=FIG_SIZE, dpi=DPI)
+        generate_data(mode="validation", num_samples=NUM_OF_SAMPLES[1],
+                      img_size=IMG_SIZE, fig_size=FIG_SIZE, dpi=DPI)
+        generate_data(mode="test", num_samples=NUM_OF_SAMPLES[2],
+                      img_size=IMG_SIZE, fig_size=FIG_SIZE, dpi=DPI)
 
     elif ACTION_TYPE == "train":
         if IMG_TYPE == "plots":
             from nn_engine.actors.train_unet import train
         elif IMG_TYPE == "labels":
             from nn_engine.actors.train_cnn_lstm import train
-        train(RUN_DESCRIPTION, DICE_COEF, DEVICE, EXPERIMENT_NAME, IMG_SIZE, FIG_SIZE,
-              DEPTH, BATCH_SIZE, LR, WEIGHTS, OUTPUT_FREQUENCY, EPOCHS, NUM_OF_SAMPLES, AXIS)
+        train(RUN_DESCRIPTION, DICE_COEF, DEVICE, EXPERIMENT_NAME,
+              IMG_SIZE, FIG_SIZE, DEPTH, BATCH_SIZE, LR, WEIGHTS,
+              OUTPUT_FREQUENCY, EPOCHS, NUM_OF_SAMPLES, AXIS)
 
     else:
-        import cv2
         import numpy as np
         from nn_engine.actors.extract import PlotScanner
-        img = cv2.imread(MY_IMG).astype(np.float32)
-        img = resized_image = cv2.resize(img, (296, 296), interpolation=cv2.INTER_CUBIC)
+        img = np.load(MY_IMG)
+        img = np.transpose(img, (1, 2, 0)) * 255
         scanner = PlotScanner()
         scanner.final_out(img)

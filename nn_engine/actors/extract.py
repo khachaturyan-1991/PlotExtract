@@ -42,7 +42,7 @@ class PlotScanner(PlotProcessor):
         """loads weights to the modesl"""
         DEPTH = 3
         unet_model = UNet(depth=DEPTH)
-        unet_model = load_model(unet_model, "./pretrained/segmentation.pth")
+        unet_model = load_model(unet_model, "./pretrained/segmentation_bw_5.pth")
         crnn_models = {"x": CNN_LSTM(), "y": CNN_LSTM()}
         for i in "x y".split():
             crnn_models[i] = load_model(crnn_models[i], f"./pretrained/{i}text.pth")
@@ -89,9 +89,9 @@ class PlotScanner(PlotProcessor):
         for i in "x y".split():
             a, b = crops_lim[i]
             if i == "x":
-                label_croped = self.img[1][a:b, :].copy()
+                label_croped = self.img[0][a:b, :].copy()
             else:
-                label_croped = self.img[1][:, a:b].copy()
+                label_croped = self.img[0][:, a:b].copy()
             label_croped = np.expand_dims(label_croped, axis=0)
             label_croped = np.expand_dims(label_croped, axis=0)
             text_res = self.models[f"label_{i}"](torch.tensor(label_croped))
@@ -158,7 +158,7 @@ class PlotScanner(PlotProcessor):
             my_f = np.poly1d(coefs)
             y = [my_f(x) for x in np.linspace(-2, 2, 100)]
             ax[1].plot(np.linspace(-2, 2, 100), y)
-            ax[1].text(0., 5 - 2 * key, f"Plot {key + 1}   a1 = {coefs[0].round(1)}; a2 = {coefs[1].round(1)}; a3 = {coefs[2].round(1)}",
+            ax[1].text(0., 5 - 2 * key, f"Plot {key + 1} a1 = {coefs[0].round(1)}; a2 = {coefs[1].round(1)}; a3 = {coefs[2].round(1)}",
                        size=10, rotation=0.,
                        ha="center", va="top",
                        bbox=dict(boxstyle="round",
@@ -172,6 +172,7 @@ class PlotScanner(PlotProcessor):
 
 if __name__ == "__main__":
     img = cv2.imread("./data/plots/test/image/0.png").astype(np.float32)
-    img = resized_image = cv2.resize(img, (296, 296), interpolation=cv2.INTER_CUBIC)
+    img = resized_image = cv2.resize(img, (296, 296),
+                                     interpolation=cv2.INTER_CUBIC)
     obj = PlotScanner()
     obj.handle(img)

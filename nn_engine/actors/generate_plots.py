@@ -1,7 +1,6 @@
 import os
 import numpy as np
 import torch
-import glob
 import cv2
 from torch.utils.data import Dataset
 import matplotlib.pyplot as plt
@@ -90,10 +89,11 @@ class GenerateDataset(Dataset):
 
         mask = np.stack((label_mask, plot_mask), axis=0)  # np.stack((axes_mask, label_mask, plot_mask), axis=0)
 
-        image = torch.from_numpy(image).permute(2, 0, 1).float() / 255.0
+        image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+        image = torch.from_numpy(image).float() / 255.0
         mask = torch.from_numpy(mask).long()
 
-        image = F.interpolate(image.unsqueeze(0), size=self.img_size, mode='bilinear', align_corners=False).squeeze(0)
+        image = F.interpolate(image.unsqueeze(0).unsqueeze(0), size=self.img_size, mode='bilinear', align_corners=False).squeeze(0)
         mask = F.interpolate(mask.unsqueeze(0).float(), size=self.img_size, mode='nearest').squeeze(0).long()
 
         return image, mask, coefs
@@ -117,31 +117,6 @@ def generate_data(mode: str = "train", axis: str = "x", num_samples: int = 1000,
             break
     print(f"{i} images were saved to {mode}")
     np.save(f'./data/plots/{mode}/coefs.npy', coefs)
-
-
-class PlotImageLoader(Dataset):
-    def __init__(self, mode: str = "train", num_samples=10, transform=None, img_size: int = 128):
-        super(Dataset, self).__init__()
-        self.transform = transform
-        self.img_size = (img_size, img_size)
-        image_paths = glob.glob(f"./data/plots/{mode}/image/*.npy")[:num_samples]
-        self.image_paths = sorted(image_paths, key=self.extract_number)
-
-    def __len__(self):
-        return len(self.image_paths)
-
-    def extract_number(self, filename):
-        base = os.path.basename(filename)
-        number = os.path.splitext(base)[0]
-        return int(number)
-
-    def __getitem__(self, idx):
-        img_path = self.image_paths[idx]
-        image = np.load(img_path)
-        mask_path = img_path.replace("image", "mask")
-        mask = np.load(mask_path)
-        _, image = cv2.threshold(image, 0.9, 1, cv2.THRESH_BINARY)
-        return image, mask
 
 
 if __name__ == "__main__":

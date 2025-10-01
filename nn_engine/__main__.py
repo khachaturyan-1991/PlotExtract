@@ -10,6 +10,7 @@ if __name__ == "__main__":
     FIG_SIZE = args.fig_size
     DPI = args.dpi
     NUM_OF_SAMPLES = args.num_of_samples
+    NUM_OF_PLOTS = args.num_of_plot_types
     AXIS = args.axis
     # train
     BATCH_SIZE = args.batch_size
@@ -32,11 +33,11 @@ if __name__ == "__main__":
             from nn_engine.actors.generate_labels import generate_data
         print(f"Starting {IMG_TYPE} generation")
         generate_data(mode="train", num_samples=NUM_OF_SAMPLES[0],
-                      img_size=IMG_SIZE, fig_size=FIG_SIZE, dpi=DPI)
+                      img_size=IMG_SIZE, fig_size=FIG_SIZE, dpi=DPI, num_of_plots=NUM_OF_PLOTS)
         generate_data(mode="validation", num_samples=NUM_OF_SAMPLES[1],
-                      img_size=IMG_SIZE, fig_size=FIG_SIZE, dpi=DPI)
+                      img_size=IMG_SIZE, fig_size=FIG_SIZE, dpi=DPI, num_of_plots=NUM_OF_PLOTS)
         generate_data(mode="test", num_samples=NUM_OF_SAMPLES[2],
-                      img_size=IMG_SIZE, fig_size=FIG_SIZE, dpi=DPI)
+                      img_size=IMG_SIZE, fig_size=FIG_SIZE, dpi=DPI, num_of_plots=NUM_OF_PLOTS)
 
     elif ACTION_TYPE == "train":
         if IMG_TYPE == "plots":

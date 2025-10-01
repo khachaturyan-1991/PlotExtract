@@ -94,7 +94,7 @@ class GenerateSequenceDataset(Dataset):
 
 
 def generate_data(mode: str = "train", num_samples: int = 1000,
-                  img_size: int = 128, fig_size: int = 5, dpi: int = 300):
+                  img_size: int = 128, fig_size: int = 5, dpi: int = 300, num_of_plots: int = None):
     if not os.path.exists(f"./data/labels/{mode}"):
         os.mkdir(f"./data/labels/{mode}")
     dataset = GenerateSequenceDataset(num_samples=num_samples, img_size=img_size, fig_size=fig_size, dpi=dpi)

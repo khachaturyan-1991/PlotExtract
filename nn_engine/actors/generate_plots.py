@@ -12,13 +12,14 @@ matplotlib.use('Agg')
 class GenerateDataset(Dataset):
 
     def __init__(self, num_samples, transform=None, tolerances: list = [80, 30],
-                 img_size: int = 128, fig_size: int = 5, dpi: int = 300):
+                 img_size: int = 128, fig_size: int = 5, dpi: int = 300, num_of_plots: int = 2):
         self.num_samples = num_samples
         self.transform = transform
         self.tolerance = tolerances
         self.dpi = dpi
         self.img_size = (img_size, img_size)
         self.fig_size = (fig_size, fig_size)
+        self.num_of_plots = num_of_plots
 
     def __len__(self):
         return self.num_samples
@@ -56,9 +57,8 @@ class GenerateDataset(Dataset):
         axes_color = [0.0, 0.0, 0.0]
         axes_labels = [1.0, 0.0, 0.0]
 
-        N_OF_PLOTS = 2
         coefs, line_colors = {}, {}
-        for i in range(N_OF_PLOTS):
+        for i in range(self.num_of_plots):
             coefs[i] = np.random.uniform(-8, 8, 3)
             y = np.poly1d(coefs[i])
             line_colors[i] = np.random.uniform(0, 1, 3).round(2)
@@ -84,7 +84,7 @@ class GenerateDataset(Dataset):
         axes_mask[self.within_tolerance(image, axes_color, self.tolerance[0])] = 1
         label_mask[self.within_tolerance(image, axes_labels, self.tolerance[0])] = 1
         label_mask = self.create_mask_with_squares(label_mask)
-        for i in range(N_OF_PLOTS):
+        for i in range(self.num_of_plots):
             plot_mask[self.within_tolerance(image, line_colors[i], self.tolerance[1])] = 1
 
         mask = np.stack((label_mask, plot_mask), axis=0)  # np.stack((axes_mask, label_mask, plot_mask), axis=0)
@@ -100,10 +100,10 @@ class GenerateDataset(Dataset):
 
 
 def generate_data(mode: str = "train", axis: str = "x", num_samples: int = 1000,
-                  img_size: int = 128, fig_size: int = 5, dpi: int = 300):
+                  img_size: int = 128, fig_size: int = 5, dpi: int = 300, num_of_plots: int = 2):
     if not os.path.exists(f"./data/plots/{mode}"):
         os.mkdir(f"./data/plots/{mode}")
-    dataset = GenerateDataset(num_samples=num_samples, img_size=img_size, fig_size=fig_size, dpi=dpi)
+    dataset = GenerateDataset(num_samples=num_samples, img_size=img_size, fig_size=fig_size, dpi=dpi, num_of_plots=num_of_plots)
     coefs = np.zeros((num_samples, 2, 3))
     images, masks, coefs = [], [], []
     for i in range(len(dataset)):

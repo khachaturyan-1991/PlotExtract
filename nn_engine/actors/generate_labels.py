@@ -97,19 +97,22 @@ def generate_data(mode: str = "train", num_samples: int = 1000,
                   img_size: int = 128, fig_size: int = 5, dpi: int = 300):
     if not os.path.exists(f"./data/labels/{mode}"):
         os.mkdir(f"./data/labels/{mode}")
-    if not os.path.exists(f"./data/labels/{mode}/x") or not os.path.exists(f"./data/labels/{mode}/y"):
-        os.mkdir(f"./data/labels/{mode}/x")
-        os.mkdir(f"./data/labels/{mode}/y")
-    dataset = GenerateSequenceDataset(num_samples=10, img_size=img_size, fig_size=fig_size, dpi=dpi)
-    df = {}
+    dataset = GenerateSequenceDataset(num_samples=num_samples, img_size=img_size, fig_size=fig_size, dpi=dpi)
+    images_x = []
+    images_y = []
+    labels = []
     for i, (img_x, img_y, lable) in enumerate(dataset):
-        df[i] = lable.numpy()
-        np.save(f"./data/labels/{mode}/x/{i}.npy", img_x[0].numpy())
-        np.save(f"./data/labels/{mode}/y/{i}.npy", img_x[0].numpy())
-        if i == num_samples:
+        images_x.append(img_x.numpy())
+        images_y.append(img_y.numpy())
+        labels.append(lable.numpy())
+        if i + 1 >= num_samples:
             break
-    df = pd.DataFrame(df).T
-    df.to_csv(f"./data/labels/{mode}/labels.csv")
+    images_x = np.stack(images_x)
+    images_y = np.stack(images_y)
+    labels = np.stack(labels)
+    np.save(f"./data/labels/{mode}/images_x.npy", images_x)
+    np.save(f"./data/labels/{mode}/images_y.npy", images_y)
+    np.save(f"./data/labels/{mode}/labels.npy", labels)
 
 
 if __name__ == "__main__":

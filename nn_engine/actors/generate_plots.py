@@ -103,19 +103,21 @@ def generate_data(mode: str = "train", axis: str = "x", num_samples: int = 1000,
                   img_size: int = 128, fig_size: int = 5, dpi: int = 300):
     if not os.path.exists(f"./data/plots/{mode}"):
         os.mkdir(f"./data/plots/{mode}")
-        os.mkdir(f"./data/plots/{mode}/image")
-        os.mkdir(f"./data/plots/{mode}/mask")
     dataset = GenerateDataset(num_samples=num_samples, img_size=img_size, fig_size=fig_size, dpi=dpi)
     coefs = np.zeros((num_samples, 2, 3))
-    i = 0
-    for img, mask, coef in dataset:
-        np.save(f'./data/plots/{mode}/image/{i}.npy', img)
-        np.save(f'./data/plots/{mode}/mask/{i}.npy', mask)
-        coefs[i] = [coef[key]for key in coef.keys()]  # coef
-        i += 1
-        if i == num_samples:
-            break
-    print(f"{i} images were saved to {mode}")
+    images, masks, coefs = [], [], []
+    for i in range(len(dataset)):
+        img, mask, coef = dataset[i]
+        images.append(img.numpy())
+        masks.append(mask.numpy())
+        coefs.append([coef[key] for key in coef.keys()])
+
+    images = np.stack(images)
+    masks = np.stack(masks)
+    coefs = np.array(coefs)
+
+    np.save(f'./data/plots/{mode}/images.npy', images)
+    np.save(f'./data/plots/{mode}/masks.npy', masks)
     np.save(f'./data/plots/{mode}/coefs.npy', coefs)
 
 
